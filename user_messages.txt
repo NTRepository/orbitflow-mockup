@@ -1,0 +1,76 @@
+hi, want to create a single page "order creation" interactive mock up. keep it simple technically (hopefully purely html + js) but the user interaction should be smooth and inspire confidence. use the mock_orders files. the idea is that there will be a system that listens for a few inbound channels (email, manual upload pdf, or watching a folder) all these inbound will show up in like a workqueue or inbox. the UI should be 3 tabs. "incoming", "Exception" and "Done". for each tab there is a list of documents / messages on the left and something like a workspace on the right. the system will be ai enabled so it tkaes a few minutes to parse and extract. the system also rsponsible for doing tagging / enriching essentially translating the external PO's langauge into internal taxonomy, this also includes tagging the division code (essentially routing decicisons) etc.. once AI done it's job, it's removed from the incoming list and into either of the Exceptions or Completed list. Before incoming stuff are done, the user should be able to click on the item to get a simple preview of the file / files in that inbound. if the user is viewing a certain document / documents in inbound, and just so happen that the system has done processing that task, the task is removed from the Inbound list, but the user's workspace should still stay on the preview so it should give user some stability and not context steal. When the AI is confident that everything is okay then it will also route the documents, with some extracted / enriched / translated metadata into ERP, and the item is moved to the "completed" list. If however the item is not fully done for example some inforamtion is missing or some ambiguity, the item will go to "exception".  Whether stuff are in exceptions or in completed, the user should be able to click and inspect. difference being "compeleted" is a view only situation, but exception is a edit and complete situation. idea is that user can intervene and fill in when and only when the AI / system is not able to find all information confidently. the UI should be smooth, but should have a visual aesthetic of a traditional software. it should feel like a traditional ERP but someone has made an attempt to make it look good. we want a sense of maturity from this. The product branding is OrbitFlow. Company is NeoTangent. Company logo at "assets/NT logo.png". also reference ../hotel/index.html for the overall visual style.
+
+---
+
+ermmm to read pdf perhaps you can read using the `llm` command let me know if you have access to it and use llm-gemini's gemini-3.1-pro-preview model please let me know if you can use ir or i need to help you setup
+
+---
+
+gemini-3-flash-preview please (yes, gemini-3-flash-preview)
+
+---
+
+oh sorry the ccp transfer slip is not part of the mock up please ignore that and remove if you have used it
+
+---
+
+thanks. can i have the incoming items come in staggered randomly a few seconds apart and show a nice animation side swipe and fade in animation to show some dynamism? same for when the items move out of the incoming box. i like the current design it's very nice alreayd actually... i liek you added the richness to it so it has a good and mature texture. now.. the "pdf preview" iframe keep refreshing itself every 1 or 2 seconds making the screen flick between the document and ddark which must be fixed.
+
+---
+
+also add some dummy completed items. use these names Alder & Finch
+Westbourne Collective
+Harbor Thread Co.
+North Vale Apparel
+Lumen Streetwear
+Brixton Ridge
+Stone & Harbor
+Mercer Lane
+Atelier Virel
+Maison Calder
+Élan District
+Verro Studio
+Urban Stitch Co.
+Threadline Basics
+Evermode Apparel
+
+---
+
+okay so, no need to have NT logo. just need the product logo which i've now put into "assets/OrbitFlow green.svg". we can still have neotangent name somewhere
+
+---
+
+thanks can you push this to surge.sh or whatever place that's the easiest way to serve static-like files
+
+---
+
+when i see it on surge.sh, the pdf preview shows blank
+
+---
+
+do i need an acocunt for netlfiy for this to work?
+
+---
+
+okay then please do github. i want private github repo is it possible?
+
+---
+
+i'm paid
+
+---
+
+done
+
+---
+
+let me pay it now hang on
+
+---
+
+yup i think it's done
+
+---
+
+thanks. are you able to nuke the one on surge.sh
+

@@ -1,0 +1,2594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OrbitFlow — Order Intake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #003366;
+    --primary-hover: #06407c;
+    --primary-light: #e6f0fa;
+    --accent: #6366F1;
+    --bg-app: #f5f6f8;
+    --bg-surface: #ffffff;
+    --bg-subtle: #fafbfc;
+    --bg-header: #ffffff;
+    --text-main: #1f2937;
+    --text-regular: #4b5563;
+    --text-muted: #6b7280;
+    --text-faint: #9ca3af;
+    --border: #e5e7eb;
+    --border-soft: #eef0f3;
+    --divider: #f1f3f5;
+    --row-hover: #f9fafb;
+    --row-selected: #eef2ff;
+    --row-selected-bd: #6366F1;
+    --success: #047857;
+    --success-bg: #ecfdf5;
+    --success-bd: #a7f3d0;
+    --warning: #b45309;
+    --warning-bg: #fffbeb;
+    --warning-bd: #fde68a;
+    --danger: #b91c1c;
+    --danger-bg: #fef2f2;
+    --danger-bd: #fecaca;
+    --info: #1d4ed8;
+    --info-bg: #eff6ff;
+    --info-bd: #bfdbfe;
+    --radius: 4px;
+    --radius-lg: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    color: var(--text-main);
+    background: var(--bg-app);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .num { font-variant-numeric: tabular-nums; letter-spacing: -0.005em; }
+
+  /* ---------- App shell ---------- */
+  .app { display: flex; flex-direction: column; height: 100vh; }
+
+  .topbar {
+    height: 48px; background: var(--bg-header);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px; flex-shrink: 0;
+    box-shadow: 0 1px 0 rgba(0,21,41,0.02);
+  }
+  .topbar-left { display: flex; align-items: center; gap: 28px; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand img.brand-logo { height: 24px; width: auto; display: block; }
+  .brand-sep { width: 1px; height: 16px; background: var(--border); }
+  .brand-by {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px; color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+  .topbar-nav { display: flex; gap: 4px; }
+  .topbar-nav a {
+    padding: 6px 10px; font-size: 13px; color: var(--text-regular);
+    text-decoration: none; border-radius: var(--radius);
+  }
+  .topbar-nav a:hover { background: var(--row-hover); color: var(--text-main); }
+  .topbar-nav a.active { color: var(--primary); font-weight: 500; }
+  .topbar-right { display: flex; align-items: center; gap: 14px; font-size: 12px; color: var(--text-muted); }
+  .topbar-right .iconbtn {
+    width: 28px; height: 28px; border-radius: var(--radius); display:flex;align-items:center;justify-content:center;
+    color: var(--text-muted); cursor:pointer;
+  }
+  .topbar-right .iconbtn:hover { background: var(--row-hover); color: var(--text-main); }
+  .avatar {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5, #06b6d4);
+    color: white; display:flex;align-items:center;justify-content:center;
+    font-size:11px; font-weight:600;
+  }
+
+  /* ---------- Subheader / page title ---------- */
+  .subheader {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px 0;
+    flex-shrink: 0;
+  }
+  .crumbs { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .crumbs span { color: var(--text-faint); }
+  .page-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 18px; font-weight: 600; letter-spacing: -0.02em;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .page-title .meta {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px; color: var(--text-muted); font-weight: 400;
+    letter-spacing: 0;
+  }
+  .page-actions { display: flex; gap: 8px; }
+  .title-row { display: flex; justify-content: space-between; align-items: flex-end; }
+
+  .tabs {
+    display: flex; gap: 0; margin-top: 14px;
+  }
+  .tab {
+    padding: 9px 14px 11px; font-size: 13px; color: var(--text-muted);
+    cursor: pointer; border-bottom: 2px solid transparent;
+    display: flex; align-items: center; gap: 7px;
+    transition: color 0.15s;
+  }
+  .tab:hover { color: var(--text-main); }
+  .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 500; }
+  .tab .count {
+    background: var(--bg-app); color: var(--text-regular);
+    font-size: 11px; padding: 1px 6px; border-radius: 99px;
+    font-variant-numeric: tabular-nums;
+    border: 1px solid var(--border-soft);
+  }
+  .tab.active .count { background: var(--primary-light); color: var(--primary); border-color: transparent; }
+  .tab.exception.active { color: var(--warning); border-bottom-color: var(--warning); }
+  .tab.exception.active .count { background: var(--warning-bg); color: var(--warning); }
+
+  /* ---------- Body ---------- */
+  .body {
+    display: flex; flex: 1; overflow: hidden;
+  }
+  .pane-list {
+    width: 380px; background: var(--bg-surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    flex-shrink: 0;
+  }
+  .list-toolbar {
+    height: 42px; padding: 0 14px;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid var(--border-soft);
+    flex-shrink: 0;
+  }
+  .search {
+    flex: 1; position: relative;
+  }
+  .search input {
+    width: 100%; height: 28px; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 0 10px 0 28px;
+    font-size: 12px; font-family: inherit; background: var(--bg-subtle);
+    color: var(--text-main);
+  }
+  .search input:focus { outline: none; border-color: var(--primary); background: white; }
+  .search svg { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: var(--text-faint); }
+
+  .filter-btn {
+    height: 28px; padding: 0 10px; border: 1px solid var(--border);
+    border-radius: var(--radius); background: var(--bg-surface);
+    font-size: 12px; color: var(--text-regular); cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    font-family: inherit;
+  }
+  .filter-btn:hover { border-color: var(--text-faint); color: var(--text-main); }
+
+  .list-scroll { flex: 1; overflow-y: auto; }
+  .list-empty {
+    padding: 60px 20px; text-align: center; color: var(--text-muted); font-size: 13px;
+  }
+  .list-empty .icon { font-size: 28px; opacity: 0.3; margin-bottom: 8px; }
+
+  .list-item {
+    padding: 12px 14px 12px 18px;
+    border-bottom: 1px solid var(--border-soft);
+    cursor: pointer; position: relative;
+    max-height: 240px;
+    overflow: hidden;
+    transition:
+      background 0.12s,
+      opacity 0.36s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.36s cubic-bezier(0.16, 1, 0.3, 1),
+      max-height 0.40s cubic-bezier(0.16, 1, 0.3, 1),
+      padding 0.40s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.25s;
+  }
+  .list-item:hover { background: var(--row-hover); }
+  .list-item.selected { background: var(--row-selected); }
+  .list-item.selected::before {
+    content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background: var(--row-selected-bd);
+  }
+  .list-item.entering {
+    opacity: 0; transform: translateX(-26px);
+    max-height: 0; padding-top: 0; padding-bottom: 0;
+    border-bottom-color: transparent;
+  }
+  .list-item.leaving {
+    opacity: 0; transform: translateX(32px);
+    max-height: 0; padding-top: 0; padding-bottom: 0;
+    border-bottom-color: transparent;
+    pointer-events: none;
+  }
+  .list-item.flash-enter {
+    background: linear-gradient(90deg, rgba(99,102,241,0.10), transparent 70%);
+  }
+  .li-row1 { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .li-channel {
+    font-size: 10px; padding: 1px 6px; border-radius: var(--radius);
+    background: var(--bg-app); color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500;
+    border: 1px solid var(--border-soft);
+    flex-shrink: 0;
+  }
+  .li-channel.email { background: #f0f9ff; color: #0369a1; border-color: #bae6fd; }
+  .li-channel.upload { background: #f3f0ff; color: #6d28d9; border-color: #ddd6fe; }
+  .li-channel.folder { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+  .li-time { font-size: 11px; color: var(--text-faint); margin-left: auto; flex-shrink: 0; }
+  .li-subject {
+    font-size: 13px; font-weight: 500; color: var(--text-main);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-bottom: 3px;
+  }
+  .li-meta {
+    font-size: 11.5px; color: var(--text-muted);
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .li-meta .sep { color: var(--text-faint); }
+  .li-status {
+    margin-top: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .progress-track {
+    flex: 1; height: 3px; background: #eef0f3; border-radius: 99px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--accent);
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .stage-label {
+    font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px;
+  }
+  .stage-spin {
+    width: 9px; height: 9px; border-radius: 50%;
+    border: 1.5px solid var(--accent); border-top-color: transparent;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 7px; border-radius: 99px;
+    font-size: 11px; font-weight: 500;
+    border: 1px solid;
+  }
+  .badge::before {
+    content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor;
+  }
+  .badge.queued { background: #f3f4f6; color: #4b5563; border-color: #e5e7eb; }
+  .badge.processing { background: var(--info-bg); color: var(--info); border-color: var(--info-bd); }
+  .badge.done { background: var(--success-bg); color: var(--success); border-color: var(--success-bd); }
+  .badge.exception { background: var(--warning-bg); color: var(--warning); border-color: var(--warning-bd); }
+  .badge.routed { background: var(--success-bg); color: var(--success); border-color: var(--success-bd); }
+  .badge.error { background: var(--danger-bg); color: var(--danger); border-color: var(--danger-bd); }
+  .badge.muted { background: var(--bg-app); color: var(--text-muted); border-color: var(--border-soft); }
+  .badge.muted::before { display:none; }
+
+  /* ---------- Workspace ---------- */
+  .pane-work {
+    flex: 1; background: var(--bg-app);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .work-empty {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 13px;
+    gap: 8px;
+  }
+  .work-empty .big {
+    font-size: 36px; opacity: 0.25;
+  }
+
+  .work-header {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    flex-shrink: 0;
+  }
+  .work-banner {
+    background: var(--success-bg); border-bottom: 1px solid var(--success-bd);
+    padding: 8px 24px; font-size: 12px; color: var(--success);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .work-banner.warn { background: var(--warning-bg); border-bottom-color: var(--warning-bd); color: var(--warning); }
+  .work-banner button {
+    margin-left: auto; background: transparent; border: 1px solid currentColor;
+    color: inherit; font-size: 11px; padding: 2px 8px; border-radius: var(--radius);
+    cursor: pointer; font-family: inherit;
+  }
+  .work-banner button:hover { background: rgba(0,0,0,0.04); }
+
+  .work-title-row {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+  }
+  .work-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 16px; font-weight: 600; letter-spacing: -0.015em;
+    margin-bottom: 4px;
+  }
+  .work-sub {
+    font-size: 12px; color: var(--text-muted);
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .work-sub .sep { color: var(--text-faint); }
+  .work-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+  .btn {
+    height: 30px; padding: 0 12px; border: 1px solid var(--border);
+    border-radius: var(--radius); background: var(--bg-surface);
+    font-family: inherit; font-size: 12px; font-weight: 500;
+    color: var(--text-main); cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn:hover { border-color: var(--text-faint); background: var(--bg-subtle); }
+  .btn.primary { background: var(--primary); color: white; border-color: var(--primary); }
+  .btn.primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+  .btn.success { background: var(--success); color: white; border-color: var(--success); }
+  .btn.success:hover { background: #065f46; border-color: #065f46; }
+  .btn.ghost { background: transparent; border-color: transparent; color: var(--text-regular); }
+  .btn.ghost:hover { background: var(--row-hover); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .work-body { flex: 1; overflow: hidden; display: flex; min-height: 0; }
+
+  /* PDF preview region */
+  .preview-col {
+    flex: 1.2; background: #404040;
+    display: flex; flex-direction: column; min-width: 0;
+  }
+  .preview-tabs {
+    display: flex; background: #2d2d2d; padding: 0 8px; border-bottom: 1px solid #1a1a1a;
+    flex-shrink: 0; gap: 1px;
+  }
+  .preview-tab {
+    padding: 8px 14px; font-size: 12px; color: #bbb; cursor: pointer;
+    background: transparent; border: none; font-family: inherit;
+    display: flex; align-items: center; gap: 6px;
+    border-top-left-radius: var(--radius); border-top-right-radius: var(--radius);
+  }
+  .preview-tab:hover { background: #3a3a3a; color: #fff; }
+  .preview-tab.active { background: #404040; color: #fff; }
+  .preview-frame {
+    flex: 1; background: #404040; overflow: hidden;
+    display: flex; align-items: stretch; justify-content: stretch;
+  }
+  .preview-frame iframe { width: 100%; height: 100%; border: 0; background: white; }
+  .preview-placeholder {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #aaa; font-size: 13px; gap: 14px; padding: 40px;
+  }
+  .preview-placeholder .scan {
+    width: 220px; height: 280px; background: white; border-radius: 4px;
+    position: relative; overflow: hidden;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.35);
+  }
+  .preview-placeholder .scan::before {
+    content: ''; position: absolute; left: 16px; right: 16px; top: 18px;
+    height: 8px; background: #eef0f3; border-radius: 2px;
+    box-shadow:
+      0 16px 0 #eef0f3, 0 32px 0 #eef0f3,
+      0 56px 0 #eef0f3, 0 72px 0 #eef0f3, 0 88px 0 #eef0f3,
+      0 112px 0 #eef0f3, 0 128px 0 #eef0f3, 0 144px 0 #eef0f3,
+      0 168px 0 #eef0f3, 0 184px 0 #eef0f3, 0 200px 0 #eef0f3;
+  }
+  .preview-placeholder .scan::after {
+    content: ''; position: absolute; left: 0; right: 0; height: 60px;
+    background: linear-gradient(180deg, transparent, rgba(99,102,241,0.35), transparent);
+    animation: scanline 2.4s ease-in-out infinite;
+  }
+  @keyframes scanline {
+    0% { top: -60px; }
+    100% { top: 100%; }
+  }
+
+  /* Inspector / extraction column */
+  .inspector-col {
+    width: 460px; background: var(--bg-surface);
+    border-left: 1px solid var(--border);
+    overflow-y: auto; flex-shrink: 0;
+  }
+  .insp-section {
+    border-bottom: 1px solid var(--border-soft);
+    padding: 16px 20px;
+  }
+  .insp-section:last-child { border-bottom: none; }
+  .insp-title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .insp-title .ai-tag {
+    font-size: 9px; padding: 1px 6px; background: linear-gradient(135deg,#6366F1,#8b5cf6);
+    color: white; border-radius: 99px; letter-spacing: 0.04em;
+    text-transform: uppercase; font-weight: 600;
+  }
+  .insp-grid {
+    display: grid; grid-template-columns: 130px 1fr; gap: 8px 14px;
+    font-size: 12.5px;
+  }
+  .insp-grid dt {
+    color: var(--text-muted); font-weight: 400; padding-top: 6px;
+  }
+  .insp-grid dd {
+    color: var(--text-main); padding-top: 6px;
+  }
+  .insp-grid dd .conf {
+    display: inline-block; margin-left: 6px; font-size: 10px; color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+  }
+  .insp-grid dd.missing {
+    color: var(--warning); font-style: italic;
+  }
+  .insp-grid input.inline {
+    width: 100%; height: 28px; border: 1px solid var(--warning-bd);
+    background: var(--warning-bg);
+    border-radius: var(--radius); padding: 0 8px; font-size: 12.5px;
+    font-family: inherit; color: var(--text-main);
+  }
+  .insp-grid input.inline:focus { outline: none; border-color: var(--warning); background: white; }
+  .insp-grid select.inline {
+    width: 100%; height: 28px; border: 1px solid var(--warning-bd);
+    background: var(--warning-bg);
+    border-radius: var(--radius); padding: 0 6px; font-size: 12.5px;
+    font-family: inherit;
+  }
+  .insp-grid select.inline:focus { outline: none; border-color: var(--warning); background: white; }
+
+  /* Mapping row (external -> internal) */
+  .map-row {
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center;
+    padding: 8px 0; font-size: 12.5px;
+  }
+  .map-row + .map-row { border-top: 1px dashed var(--border-soft); }
+  .map-from {
+    background: var(--bg-app); border: 1px solid var(--border-soft);
+    padding: 4px 8px; border-radius: var(--radius);
+    color: var(--text-regular); font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11.5px;
+  }
+  .map-arrow { color: var(--text-faint); font-size: 14px; }
+  .map-to {
+    color: var(--text-main); font-weight: 500;
+  }
+  .map-to .conf { font-size: 10px; color: var(--text-faint); margin-left: 6px; font-weight: 400; }
+
+  .ai-thoughts {
+    background: var(--bg-subtle); border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg); padding: 10px 12px;
+    font-size: 12px; color: var(--text-regular); line-height: 1.55;
+  }
+  .ai-thoughts .label {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--accent); margin-bottom: 4px;
+    display: flex; align-items: center; gap: 5px;
+  }
+
+  .issue-card {
+    background: var(--warning-bg); border: 1px solid var(--warning-bd);
+    border-radius: var(--radius-lg); padding: 10px 12px; margin-bottom: 10px;
+    font-size: 12.5px;
+  }
+  .issue-card .h {
+    font-weight: 600; color: var(--warning); margin-bottom: 3px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .issue-card .d { color: var(--text-regular); }
+  .issue-card.critical { background: var(--danger-bg); border-color: var(--danger-bd); }
+  .issue-card.critical .h { color: var(--danger); }
+
+  /* line items table */
+  .li-table {
+    width: 100%; border-collapse: collapse; font-size: 12px;
+  }
+  .li-table th {
+    text-align: left; padding: 8px 10px; font-size: 10.5px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text-muted); border-bottom: 1px solid var(--border);
+    background: var(--bg-subtle); position: sticky; top: 0;
+  }
+  .li-table td {
+    padding: 8px 10px; border-bottom: 1px solid var(--border-soft);
+    color: var(--text-main);
+  }
+  .li-table tr:hover td { background: var(--row-hover); }
+  .li-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .li-table th.num { text-align: right; }
+
+  /* timeline */
+  .timeline { position: relative; padding-left: 18px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 5px; top: 4px; bottom: 4px;
+    width: 1px; background: var(--border);
+  }
+  .tl-item { position: relative; padding-bottom: 12px; }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-item::before {
+    content: ''; position: absolute; left: -16px; top: 4px;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: white; border: 2px solid var(--text-faint);
+  }
+  .tl-item.done::before { border-color: var(--success); background: var(--success); }
+  .tl-item.active::before {
+    border-color: var(--accent); background: var(--accent);
+    box-shadow: 0 0 0 4px rgba(99,102,241,0.15);
+  }
+  .tl-item .lbl { font-size: 12.5px; font-weight: 500; color: var(--text-main); }
+  .tl-item .sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+  /* ===== Horizontal pipeline (top of workspace) ===== */
+  .pipeline-h {
+    display: flex; align-items: center; gap: 4px;
+    background: var(--bg-subtle); border-bottom: 1px solid var(--border);
+    padding: 12px 18px; flex-shrink: 0;
+    overflow-x: auto;
+  }
+  .pipeline-h .step {
+    display: flex; align-items: center; gap: 9px;
+    flex: 1 1 0; min-width: 0; padding: 4px 6px; border-radius: var(--radius);
+  }
+  .pipeline-h .step .dot {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--text-faint); background: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10.5px; font-weight: 700; color: var(--text-muted);
+    flex-shrink: 0; transition: all 0.25s;
+  }
+  .pipeline-h .step.done .dot { border-color: var(--success); background: var(--success); color: white; }
+  .pipeline-h .step.active .dot {
+    border-color: var(--accent); background: var(--accent); color: white;
+    box-shadow: 0 0 0 4px rgba(99,102,241,0.18);
+    animation: pulseDot 1.6s ease-in-out infinite;
+  }
+  .pipeline-h .step.review .dot { border-color: var(--warning); background: var(--warning); color: white; }
+  .pipeline-h .step.failed .dot { border-color: var(--danger); background: var(--danger); color: white; }
+  .pipeline-h .step.na   .dot { border-style: dashed; background: var(--bg-subtle); color: var(--text-faint); }
+  @keyframes pulseDot {
+    0%,100% { box-shadow: 0 0 0 4px rgba(99,102,241,0.18); }
+    50%     { box-shadow: 0 0 0 7px rgba(99,102,241,0.05); }
+  }
+  .pipeline-h .step .lbl { display: flex; flex-direction: column; min-width: 0; }
+  .pipeline-h .step .lbl .name {
+    font-size: 11.5px; font-weight: 500; color: var(--text-main);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .pipeline-h .step .lbl .sub {
+    font-size: 10.5px; color: var(--text-muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .pipeline-h .step.na .lbl .name { color: var(--text-muted); }
+  .pipeline-h .step.na .lbl .sub  { font-style: italic; color: var(--text-faint); }
+  .pipeline-h .step.failed .lbl .sub { color: var(--danger); font-weight: 500; }
+  .pipeline-h .arrow { color: var(--text-faint); font-size: 13px; flex-shrink: 0; }
+
+  /* ===== Resizable column divider ===== */
+  .col-divider {
+    width: 6px; flex-shrink: 0; cursor: col-resize;
+    background: var(--border); position: relative;
+    transition: background 0.12s;
+  }
+  .col-divider:hover, .col-divider.dragging { background: var(--accent); }
+  .col-divider::after {
+    content: ''; position: absolute; left: 50%; top: 50%;
+    width: 2px; height: 32px; background: var(--text-faint);
+    border-radius: 1px; transform: translate(-50%, -50%); opacity: 0.5;
+  }
+
+  /* ===== Pencil edit button for PO field ===== */
+  .field-row { display: flex; align-items: center; gap: 4px; }
+  .field-row .val { flex: 1; min-width: 0; }
+  .field-edit {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: var(--radius);
+    border: none; background: transparent; cursor: pointer;
+    color: var(--text-faint); flex-shrink: 0;
+    transition: color 0.12s, background 0.12s; opacity: 0;
+  }
+  .insp-grid dd:hover .field-edit { opacity: 1; }
+  .field-edit:hover { color: var(--accent); background: var(--row-hover); }
+  .field-edit.locked { color: var(--warning); opacity: 0.5; }
+  .field-edit.locked:hover { color: var(--warning); opacity: 1; background: var(--warning-bg); }
+  .insp-grid input.inline.editmode { border-color: var(--accent); background: white; }
+
+  /* ===== ERP failure indicator ===== */
+  .badge.failed {
+    background: var(--danger-bg); color: var(--danger);
+    border: 1px solid var(--danger-bd);
+  }
+  .erp-failure-banner {
+    background: var(--danger-bg); border: 1px solid var(--danger-bd);
+    border-radius: var(--radius-lg); padding: 10px 12px;
+    font-size: 12.5px; color: var(--text-regular); margin-bottom: 12px;
+    display: flex; align-items: flex-start; gap: 8px; line-height: 1.5;
+  }
+  .erp-failure-banner svg { color: var(--danger); flex-shrink: 0; margin-top: 1px; }
+  .erp-failure-banner strong { color: var(--danger); display: block; margin-bottom: 2px; }
+
+  /* ===== Collapsible list pane + collapse button ===== */
+  .pane-list { transition: width 0.22s cubic-bezier(0.16,1,0.3,1); }
+  .pane-list.collapsed { width: 42px; }
+  .pane-list.collapsed .list-toolbar > *:not(.collapse-btn) { display: none; }
+  .pane-list.collapsed .list-scroll { display: none; }
+  .pane-list.collapsed .collapse-btn { transform: rotate(180deg); }
+  .collapse-btn {
+    width: 26px; height: 26px; border-radius: var(--radius);
+    border: 1px solid var(--border); background: var(--bg-surface);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); font-family: inherit; flex-shrink: 0;
+    transition: transform 0.22s;
+  }
+  .collapse-btn:hover { color: var(--text-main); border-color: var(--text-faint); }
+
+  /* ===== Exception summary at top ===== */
+  .exception-summary {
+    background: linear-gradient(180deg, var(--warning-bg) 0%, rgba(252,231,191,0.5) 100%);
+    border-bottom: 1px solid var(--warning-bd);
+    padding: 14px 18px; flex-shrink: 0;
+  }
+  .exception-summary .head {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--warning); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .exception-summary .issue-line {
+    font-size: 12.5px; color: var(--text-regular); padding: 3px 0;
+    display: flex; gap: 8px; align-items: flex-start; line-height: 1.5;
+  }
+  .exception-summary .issue-line::before {
+    content: '•'; color: var(--warning); font-weight: 700; flex-shrink: 0;
+  }
+  .exception-summary .issue-line strong { color: var(--warning); margin-right: 4px; }
+
+  /* ===== Layout overrides for new column order ===== */
+  .inspector-col { width: auto; flex: 1.4 1 0; min-width: 360px; border-left: none; }
+  .preview-col   { flex: 1 1 0;  min-width: 280px; }
+
+  .footer-bar {
+    height: 28px; background: var(--bg-surface);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; font-size: 11px; color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .footer-bar .pulse {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--success);
+    box-shadow: 0 0 0 0 rgba(4,120,87,0.5);
+    animation: pulse 2s infinite;
+    margin-right: 6px;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(4,120,87,0.5); }
+    70% { box-shadow: 0 0 0 6px rgba(4,120,87,0); }
+    100% { box-shadow: 0 0 0 0 rgba(4,120,87,0); }
+  }
+  .footer-left, .footer-right { display: flex; align-items: center; gap: 14px; }
+
+  /* ===== View switcher ===== */
+  .view { display: none; flex: 1; min-height: 0; flex-direction: column; }
+  .view.active { display: flex; }
+
+  /* ===== Page chrome (used by dashboard / vendors / routing) ===== */
+  .page { flex: 1; min-height: 0; overflow-y: auto; background: var(--bg-canvas); }
+  .page-inner { max-width: 1480px; margin: 0 auto; padding: 24px 32px 60px; }
+  .page-header { margin-bottom: 22px; }
+  .page-header .crumb { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .page-header h1 { font-size: 22px; font-weight: 600; color: var(--text-main); margin: 0 0 4px 0; letter-spacing: -0.01em; }
+  .page-header .sub { font-size: 13px; color: var(--text-muted); }
+  .section { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 18px; }
+  .section-h { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .section-h h2 { font-size: 13px; font-weight: 600; color: var(--text-main); margin: 0; letter-spacing: -0.005em; }
+  .section-h .meta { font-size: 11.5px; color: var(--text-muted); }
+  .section-body { padding: 16px 18px; }
+
+  /* ===== Dashboard ===== */
+  .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 18px; }
+  .kpi {
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 14px 16px; position: relative; overflow: hidden;
+  }
+  .kpi.alert { border-color: var(--danger-bd); background: linear-gradient(180deg, rgba(252,231,231,0.4) 0%, white 100%); }
+  .kpi.warn  { border-color: var(--warning-bd); background: linear-gradient(180deg, rgba(252,231,191,0.4) 0%, white 100%); }
+  .kpi .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .kpi .v { font-size: 26px; font-weight: 600; color: var(--text-main); margin-top: 4px; letter-spacing: -0.02em; line-height: 1.1; }
+  .kpi .delta { font-size: 11.5px; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+  .kpi .delta.up   { color: var(--success); }
+  .kpi .delta.down { color: var(--danger); }
+  .kpi .delta.neut { color: var(--text-muted); }
+  .kpi .ic { position: absolute; right: 14px; top: 14px; color: var(--text-faint); }
+
+  .grid-2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; margin-bottom: 18px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+
+  /* Bar chart */
+  .chart {
+    display: flex; align-items: flex-end; gap: 6px; height: 180px; padding: 6px 4px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .chart .col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 1px; min-width: 0; cursor: default; }
+  .chart .col .seg { width: 100%; }
+  .chart .col .seg.routed { background: var(--success); }
+  .chart .col .seg.held   { background: var(--warning); }
+  .chart .col .seg.failed { background: var(--danger); }
+  .chart .col:hover .seg { opacity: 0.85; }
+  .chart-axis { display: flex; gap: 6px; padding: 6px 4px 0; }
+  .chart-axis .lbl { flex: 1; text-align: center; font-size: 10px; color: var(--text-faint); min-width: 0; }
+  .chart-legend { display: flex; gap: 14px; font-size: 11.5px; color: var(--text-muted); margin-top: 12px; }
+  .chart-legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+
+  /* Activity feed */
+  .feed-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; line-height: 1.45; }
+  .feed-item:last-child { border-bottom: none; }
+  .feed-item .feed-ic {
+    flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg-subtle); color: var(--text-muted);
+  }
+  .feed-item.ok   .feed-ic { background: rgba(4,120,87,0.12); color: var(--success); }
+  .feed-item.warn .feed-ic { background: var(--warning-bg); color: var(--warning); }
+  .feed-item.fail .feed-ic { background: var(--danger-bg); color: var(--danger); }
+  .feed-item .feed-body { flex: 1; min-width: 0; }
+  .feed-item .feed-body .who { color: var(--text-main); }
+  .feed-item .feed-body .what { color: var(--text-regular); }
+  .feed-item .feed-body .when { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+
+  /* Health bars (channel / vendor) */
+  .hbar-row { display: grid; grid-template-columns: 130px 1fr 60px; gap: 12px; align-items: center; padding: 7px 0; font-size: 12.5px; }
+  .hbar-row .name { color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hbar-row .num { text-align: right; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 11.5px; }
+  .hbar-track { height: 8px; background: var(--bg-subtle); border-radius: 4px; overflow: hidden; display: flex; }
+  .hbar-track .seg { height: 100%; }
+  .hbar-track .seg.routed { background: var(--success); }
+  .hbar-track .seg.held   { background: var(--warning); }
+  .hbar-track .seg.failed { background: var(--danger); }
+
+  /* ===== Vendors ===== */
+  .vendors-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .vendors-table th {
+    text-align: left; padding: 10px 12px; background: var(--bg-subtle); border-bottom: 1px solid var(--border);
+    font-weight: 500; color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .vendors-table th.num { text-align: right; }
+  .vendors-table td { padding: 12px; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
+  .vendors-table td.num { text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; }
+  .vendors-table tr.expanded td { background: var(--row-hover); border-bottom-color: var(--border); }
+  .vendor-detail { padding: 0 !important; }
+  .vendor-detail-inner { padding: 18px 22px; background: var(--bg-subtle); border-top: 1px solid var(--border); }
+  .vendor-detail-inner h4 { font-size: 11.5px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 10px 0; }
+  .vendor-detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; }
+  .alias-chip {
+    display: inline-block; background: white; border: 1px solid var(--border);
+    border-radius: 12px; padding: 3px 10px; font-size: 11.5px; color: var(--text-regular);
+    margin: 0 4px 4px 0; font-family: 'JetBrains Mono', monospace;
+  }
+  .alias-chip.primary { background: rgba(4,120,87,0.08); border-color: rgba(4,120,87,0.3); color: var(--success); font-weight: 500; }
+  .quirk { font-size: 12px; color: var(--text-regular); padding: 4px 0; display: flex; gap: 7px; }
+  .quirk::before { content: '—'; color: var(--text-faint); }
+  .vendor-confbar { display: flex; align-items: center; gap: 8px; }
+  .vendor-confbar .bar { flex: 1; height: 6px; background: var(--bg-subtle); border-radius: 3px; overflow: hidden; }
+  .vendor-confbar .bar > span { display: block; height: 100%; background: var(--success); }
+  .vendor-confbar .bar > span.warn { background: var(--warning); }
+  .vendor-confbar .pct { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); width: 32px; text-align: right; }
+
+  .pending-vendor-card {
+    background: var(--bg-surface); border: 1px solid var(--warning-bd); border-radius: var(--radius-lg);
+    padding: 14px 16px; display: flex; align-items: center; gap: 14px;
+  }
+  .pending-vendor-card .pv-name { font-size: 13px; font-weight: 500; color: var(--text-main); margin-bottom: 2px; }
+  .pending-vendor-card .pv-meta { font-size: 11.5px; color: var(--text-muted); }
+  .pending-vendor-card .pv-suggest { font-size: 11.5px; color: var(--text-regular); margin-top: 4px; }
+  .pending-vendor-card .pv-suggest strong { color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+  .pending-stack { display: flex; flex-direction: column; gap: 10px; }
+
+  /* ===== Routing rules ===== */
+  .rule-row {
+    display: grid; grid-template-columns: 18px 28px 1fr 1fr 130px 80px 60px; gap: 14px;
+    align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border-soft);
+    background: var(--bg-surface);
+  }
+  .rule-row:last-child { border-bottom: none; }
+  .rule-row:hover { background: var(--row-hover); }
+  .rule-row .drag { color: var(--text-faint); cursor: grab; user-select: none; font-size: 14px; line-height: 1; }
+  .rule-row .num-badge {
+    width: 24px; height: 24px; border-radius: 50%; background: var(--bg-subtle);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+  }
+  .rule-cond, .rule-then { font-size: 12.5px; color: var(--text-regular); line-height: 1.5; }
+  .rule-cond .k, .rule-then .k { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 11.5px; }
+  .rule-cond .op { color: var(--text-faint); margin: 0 4px; }
+  .rule-stats { font-size: 11.5px; color: var(--text-muted); display: flex; flex-direction: column; gap: 2px; }
+  .rule-stats .triggered { color: var(--text-main); font-weight: 500; }
+  .rule-stats .overridden { color: var(--warning); }
+  .toggle {
+    width: 32px; height: 18px; border-radius: 9px; background: var(--bg-subtle);
+    border: 1px solid var(--border); position: relative; cursor: pointer;
+  }
+  .toggle::after { content: ''; position: absolute; left: 2px; top: 1px; width: 12px; height: 12px; border-radius: 50%; background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: left 0.18s; }
+  .toggle.on { background: var(--success); border-color: var(--success); }
+  .toggle.on::after { left: 16px; }
+
+  .threshold-card {
+    display: grid; grid-template-columns: 200px 1fr 70px; gap: 18px; align-items: center;
+    padding: 14px 0; border-bottom: 1px solid var(--border-soft);
+  }
+  .threshold-card:last-child { border-bottom: none; }
+  .threshold-card .tc-name { font-size: 13px; color: var(--text-main); font-weight: 500; }
+  .threshold-card .tc-name .sub { font-size: 11.5px; color: var(--text-muted); font-weight: 400; margin-top: 2px; }
+  .threshold-card input[type=range] { width: 100%; accent-color: var(--accent); }
+  .threshold-card .tc-val { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--accent); font-weight: 600; text-align: right; }
+
+  .validator-row {
+    display: grid; grid-template-columns: 110px 1fr; gap: 14px; padding: 10px 0;
+    border-bottom: 1px solid var(--border-soft); font-size: 12.5px;
+  }
+  .validator-row:last-child { border-bottom: none; }
+  .validator-row .ch { color: var(--text-main); font-weight: 500; }
+  .validator-row .req { display: flex; flex-wrap: wrap; gap: 5px; }
+  .req-chip {
+    display: inline-block; background: var(--bg-subtle); border: 1px solid var(--border);
+    border-radius: 4px; padding: 2px 8px; font-size: 11px; color: var(--text-regular);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .req-chip.optional { color: var(--text-muted); border-style: dashed; background: white; }
+
+  /* toast */
+  .toast-stack { position: fixed; bottom: 38px; right: 18px; display: flex; flex-direction: column; gap: 8px; z-index: 1000; }
+  .toast {
+    background: white; border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 10px 14px; font-size: 12.5px; min-width: 280px; max-width: 360px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    display: flex; align-items: flex-start; gap: 10px;
+    animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .toast.success { border-left: 3px solid var(--success); }
+  .toast.warn { border-left: 3px solid var(--warning); }
+  .toast.info { border-left: 3px solid var(--accent); }
+  .toast .ic { flex-shrink: 0; margin-top: 1px; }
+  .toast .body .t { font-weight: 500; margin-bottom: 2px; }
+  .toast .body .d { color: var(--text-muted); font-size: 11.5px; }
+  @keyframes slideIn { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* simulate panel (dev) */
+  .sim-toggle {
+    position: fixed; bottom: 36px; left: 14px;
+    background: white; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 4px 10px; font-size: 11px; color: var(--text-muted); cursor: pointer;
+    font-family: inherit;
+  }
+  .sim-toggle:hover { color: var(--text-main); }
+
+  /* ---------- responsive shrink ---------- */
+  @media (max-width: 1280px) {
+    .pane-list { width: 320px; }
+    .inspector-col { width: 400px; }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="brand">
+        <img src="assets/OrbitFlow green.svg" alt="OrbitFlow" class="brand-logo" />
+        <div class="brand-sep"></div>
+        <div class="brand-by">by NeoTangent</div>
+      </div>
+      <nav class="topbar-nav">
+        <a href="#" data-view="dashboard">Dashboard</a>
+        <a href="#" class="active" data-view="inbox">Order Intake</a>
+        <a href="#">Catalog</a>
+        <a href="#" data-view="vendors">Vendors</a>
+        <a href="#" data-view="routing">Routing Rules</a>
+        <a href="#">Reports</a>
+      </nav>
+    </div>
+    <div class="topbar-right">
+      <div class="iconbtn" title="Search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </div>
+      <div class="iconbtn" title="Help">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+      </div>
+      <div class="iconbtn" title="Notifications">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+      </div>
+      <div style="width:1px;height:18px;background:var(--border);"></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="avatar">MW</div>
+        <div style="font-size:12px;color:var(--text-main);">M. Wong</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subheader -->
+  <div class="subheader">
+    <div class="title-row">
+      <div>
+        <div class="crumbs">Operations <span>›</span> <span>Order Intake</span></div>
+        <div class="page-title">
+          Order Intake
+          <span class="meta">AI-assisted purchase order ingestion · routes to ERP-PRD</span>
+        </div>
+      </div>
+      <div class="page-actions">
+        <button class="btn ghost" id="btnRefresh">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
+          Refresh
+        </button>
+        <button class="btn ghost" id="btnSources">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Inbound sources
+        </button>
+        <button class="btn primary" id="btnUpload">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><path d="M12 3v12"/></svg>
+          Upload PO
+        </button>
+      </div>
+    </div>
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-tab="incoming">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+        Incoming <span class="count" id="cnt-incoming">0</span>
+      </div>
+      <div class="tab exception" data-tab="exception">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Exception <span class="count" id="cnt-exception">0</span>
+      </div>
+      <div class="tab" data-tab="done">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Done <span class="count" id="cnt-done">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="view active" id="view-inbox">
+  <div class="body">
+    <!-- LEFT: list -->
+    <div class="pane-list" id="paneList">
+      <div class="list-toolbar">
+        <button class="collapse-btn" id="collapseList" title="Collapse list">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="search">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="searchInput" placeholder="Search subject, vendor, PO #..." />
+        </div>
+        <button class="filter-btn" title="Filter">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          All channels
+        </button>
+      </div>
+      <div class="list-scroll" id="listScroll"></div>
+    </div>
+
+    <!-- RIGHT: workspace -->
+    <div class="pane-work" id="paneWork">
+      <div class="work-empty" id="workEmpty">
+        <div class="big">
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        </div>
+        <div>Select an item to inspect</div>
+        <div style="font-size:11.5px;color:var(--text-faint);">OrbitFlow streams inbound documents from email, watched folders, and manual uploads</div>
+      </div>
+    </div>
+  </div>
+  </div><!-- /#view-inbox -->
+
+  <!-- ===== DASHBOARD VIEW (static) ===== -->
+  <div class="view" id="view-dashboard"></div>
+
+  <!-- ===== VENDORS VIEW (static) ===== -->
+  <div class="view" id="view-vendors"></div>
+
+  <!-- ===== ROUTING RULES VIEW (static) ===== -->
+  <div class="view" id="view-routing"></div>
+
+  <!-- Status footer -->
+  <div class="footer-bar">
+    <div class="footer-left">
+      <span><span class="pulse"></span>Listeners online</span>
+      <span>imap://intake@neotangent.com</span>
+      <span>watch://\\fs01\orbitflow\drop</span>
+      <span>POST /api/intake/upload</span>
+    </div>
+    <div class="footer-right">
+      <span>ERP target: <strong style="color:var(--text-main);">SAP S/4 PRD</strong></span>
+      <span>v2.4.1</span>
+    </div>
+  </div>
+</div>
+
+<button class="sim-toggle" id="simToggle" title="Demo controls">⚙ Demo controls</button>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+/* ===========================================================
+   OrbitFlow — Order Intake mock
+   =========================================================== */
+
+const STAGES = [
+  { key: 'queued',      label: 'Queued',                sub: 'Waiting for AI worker' },
+  { key: 'extracting',  label: 'Extracting fields',     sub: 'OCR + structured parse' },
+  { key: 'tagging',     label: 'Tagging & enrichment',  sub: 'Mapping to internal taxonomy' },
+  { key: 'routing',     label: 'Routing decision',      sub: 'Resolving division & ERP plant' },
+  { key: 'humanReview', label: 'Awaiting human review', sub: 'Confidence above threshold' },
+  { key: 'postedErp',   label: 'Posted to ERP',         sub: 'SAP S/4 PRD' },
+];
+// Only the first AI_STAGES are advanced automatically by the AI worker.
+// The remaining stages (humanReview, postedErp) are state-driven.
+const AI_STAGES = 4;
+
+// ----- mock data -----
+const NOW = Date.now();
+const mins = (m) => new Date(NOW - m*60000).toISOString();
+
+const ITEMS = [
+  {
+    id: 'msg-001',
+    channel: 'email',
+    subject: 'PO 2450187 — FLEECE ZIP HOODIE SS27 (BrightKids)',
+    sender: 'orders@brightkids-buying.com',
+    receivedAt: mins(2),
+    files: [{ name: 'BrightKids PO 2450187.pdf', src: 'mock_orders/brightkids_2450187.pdf' }],
+    state: 'incoming',
+    stageIdx: 0, stageProgress: 0,
+    fate: 'done',  // where AI will route
+    hidden: false,
+    extracted: {
+      'External PO #':      { v: '2450187', conf: 0.99 },
+      'Customer':           { v: 'BrightKids Buying Co.', conf: 0.98 },
+      'Supplier':           { v: 'BrightKids Sourcing Ltd', conf: 0.97 },
+      'Factory':            { v: 'Adib Apparels (PLT-BD-CTG-220)', conf: 0.94 },
+      'Inco terms':         { v: 'FOB Chittagong', conf: 0.96 },
+      'Ship mode':          { v: 'Ocean', conf: 0.99 },
+      'Port of exit':       { v: 'Chittagong, Bangladesh', conf: 0.98 },
+      'Port of entry':      { v: 'Newark, NJ', conf: 0.97 },
+      'Currency':           { v: 'USD', conf: 1.00 },
+      'Country of Origin':  { v: 'Bangladesh', conf: 0.99 },
+      'Total Qty':          { v: '5,730', conf: 0.97 },
+      'Total Value':        { v: 'USD 33,520.50', conf: 0.96 },
+      'Ship date 1':        { v: '15-Jul-2026', conf: 0.99 },
+      'Ship date 2':        { v: '05-Aug-2026', conf: 0.99 },
+      'Payment Terms':      { v: 'Net 90', conf: 0.99 },
+    },
+    mappings: [
+      { from: '432 BOYS 3-16', to: 'Division 04 — Kidswear (Boys)', conf: 0.96 },
+      { from: '432004 HOODIES & SWEAT', to: 'Category KW-04-HSW', conf: 0.98 },
+      { from: 'FLEECE ZIP HOODIE', to: 'SKU template HOODIE-ZIP-FLC', conf: 0.95 },
+      { from: 'Vendor 07821490', to: 'BPV-018221 (BrightKids Sourcing Ltd)', conf: 0.99 },
+      { from: 'Factory 41098223', to: 'PLT-BD-CTG-220 (Adib Apparels)', conf: 0.93 },
+    ],
+    aiNote: 'Layout matches BrightKids template v3 (last seen 12 Apr). All required fields present. 2 delivery splits parsed; routing to BD/CTG hub.',
+    lineItems: [
+      { item: '4320-51892-6103-007', color: 'Charcoal Marl', size: '3-4Y',   bc: '5078912340011', qty: 220, cost: 5.85 },
+      { item: '4320-51892-6103-007', color: 'Charcoal Marl', size: '5-6Y',   bc: '5078912340035', qty: 490, cost: 5.85 },
+      { item: '4320-51892-6103-007', color: 'Charcoal Marl', size: '7-8Y',   bc: '5078912340059', qty: 720, cost: 5.85 },
+      { item: '4320-51892-6103-007', color: 'Charcoal Marl', size: '9-10Y',  bc: '5078912340073', qty: 675, cost: 5.85 },
+      { item: '4320-51892-6103-007', color: 'Charcoal Marl', size: '11-12Y', bc: '5078912340097', qty: 430, cost: 5.85 },
+    ],
+    erp: {
+      doc: 'ZPO-100022841',
+      plant: 'BD220 — Chittagong Hub',
+      buyerGroup: 'KW-BOYS',
+      requestedDelivery: '15-Jul-2026',
+    },
+  },
+
+  {
+    id: 'msg-002',
+    channel: 'email',
+    subject: 'AW26 Stitch Xmas crew — POs 1208545 & 1208546',
+    sender: 'po-dispatch@threadhaven.co.uk',
+    receivedAt: mins(6),
+    files: [
+      { name: 'ThreadHaven PO 1208545.pdf', src: 'mock_orders/george_1208545.pdf' },
+      { name: 'ThreadHaven PO 1208546.pdf', src: 'mock_orders/george_1208546.pdf' },
+    ],
+    state: 'incoming',
+    stageIdx: 0, stageProgress: 0,
+    fate: 'done',
+    hidden: true, revealInMs: 6000,
+    extracted: {
+      'External PO #':      { v: '1208545, 1208546', conf: 0.99 },
+      'Customer':           { v: 'ThreadHaven Retail (UK)', conf: 0.97 },
+      'Supplier':           { v: 'ThreadHaven Sourcing', conf: 0.99 },
+      'Factory':            { v: 'Qingdao Knitwear Ltd (PLT-CN-QDG-104)', conf: 0.95 },
+      'Inco terms':         { v: 'CIF Felixstowe', conf: 0.93 },
+      'Ship mode':          { v: 'Ocean', conf: 0.99 },
+      'Port of exit':       { v: 'Shandong - Qingdao', conf: 0.98 },
+      'Port of entry':      { v: 'Felixstowe, UK', conf: 0.97 },
+      'Currency':           { v: 'USD', conf: 1.00 },
+      'Country of Origin':  { v: 'China', conf: 0.99 },
+      'Total Qty (combined)':{ v: '4,245', conf: 0.95 },
+      'Ship date':          { v: '08-Aug-2026', conf: 0.99 },
+      'Payment Terms':      { v: 'Net 120', conf: 0.99 },
+    },
+    mappings: [
+      { from: '581 OLDER GIRLS', to: 'Division 05 — Kidswear (Girls 7-14)', conf: 0.97 },
+      { from: '581006 COVER UPS', to: 'Category KW-05-CVR', conf: 0.96 },
+      { from: 'Look: P7LICENSE / Disney Stitch', to: 'License DSY-STITCH-2026', conf: 0.94 },
+      { from: 'Vendor 05344742', to: 'BPV-014102 (ThreadHaven Sourcing)', conf: 0.99 },
+      { from: 'Factory 36229061', to: 'PLT-CN-QDG-104 (Qingdao Knitwear)', conf: 0.95 },
+    ],
+    aiNote: 'Two-PO bundle from same vendor — bundling under PO group GRP-1208545. Stitch license auto-attached.',
+    lineItems: [
+      { item: '5810-30338-4877-003', color: 'Lilac AOP', size: '5-6Y',   bc: '5059207452537', qty: 280, cost: 7.43 },
+      { item: '5810-30338-4877-003', color: 'Lilac AOP', size: '7-8Y',   bc: '5059207452575', qty: 375, cost: 7.43 },
+      { item: '5810-30338-4877-003', color: 'Lilac AOP', size: '9-10Y',  bc: '5059207452599', qty: 420, cost: 7.43 },
+    ],
+    erp: { doc: 'ZPO-100022842', plant: 'CN104 — Qingdao Hub', buyerGroup: 'KW-GIRLS', requestedDelivery: '08-Aug-2026' },
+  },
+
+  {
+    id: 'msg-003',
+    channel: 'upload',
+    subject: 'PO 461-38901 — FF SKIRT PU RUCHED MINI BLACK',
+    sender: 'm.wong@neotangent.com (manual upload)',
+    receivedAt: mins(11),
+    files: [{ name: '461-38901 PO.pdf', src: 'mock_orders/raj_461-38901.pdf' }],
+    state: 'incoming',
+    stageIdx: 0, stageProgress: 0,
+    fate: 'exception',
+    hidden: true, revealInMs: 14000,
+    extracted: {
+      'External PO #':      { v: '461-38901', conf: 0.99 },
+      'Customer':           { v: 'Raj International Sourcing Ltd', conf: 0.98 },
+      'Style No':           { v: 'JL627409', conf: 0.99 },
+      'Description':        { v: 'AW26 FF SKIRT PU RUCHED MINI BLACK', conf: 0.97 },
+      'Inco terms':         { v: 'FOB Chittagong', conf: 0.96 },
+      'Ship mode':          { v: 'Ocean', conf: 0.99 },
+      'Port of exit':       { v: 'Chittagong, Bangladesh', conf: 0.98 },
+      'Port of entry':      { v: 'Felixstowe, UK', conf: 0.92 },
+      'Currency':           { v: 'USD', conf: 1.00 },
+      'Total Qty':          { v: '1,384', conf: 0.99 },
+      'Total Value':        { v: 'USD 13,314.08', conf: 0.99 },
+      'Country of Origin':  { v: 'Bangladesh', conf: 0.99 },
+      'Earliest Handover':  { v: '10-Aug-2026', conf: 0.99 },
+      'Division (internal)':{ v: null, conf: 0, missing: true,
+        options: ['Division 02 — Womenswear', 'Division 06 — Womens Casual', 'Division 09 — Active'] },
+      'Supplier ERP code':  { v: null, conf: 0, missing: true,
+        suggest: 'BPV-019930 (Raj Limited) — 78% match' },
+      'Factory':            { v: null, conf: 0, missing: true,
+        suggest: 'Closest: PLT-BD-CTG-220 (Adib Apparels)' },
+    },
+    mappings: [
+      { from: 'Brand: FF', to: 'Brand FF (Fashion Forward)', conf: 0.96 },
+      { from: 'Hub: Bangladesh', to: 'Sourcing Hub BD-CTG', conf: 0.98 },
+      { from: 'Category: Womens Casual', to: '⚠ Ambiguous — 2 candidates', conf: 0.62, warn: true },
+      { from: 'HTS 6204591090', to: 'Tariff WSK-PU-MINI', conf: 0.95 },
+    ],
+    issues: [
+      { kind: 'warn', h: 'Division code unresolved',
+        d: 'Vendor "Raj International Sourcing Ltd" historically maps to multiple divisions (Womenswear vs Womens Casual). Confidence below threshold (62%). Please confirm.' },
+      { kind: 'warn', h: 'Supplier ERP code missing',
+        d: 'No exact match in vendor master. Closest candidate: BPV-019930 (Raj Limited) at 78% similarity. Either confirm or create new vendor request.' },
+      { kind: 'warn', h: 'Factory not in master',
+        d: 'Factory string from PO does not match any plant. Suggest mapping to PLT-BD-CTG-220.' },
+    ],
+    aiNote: 'Header parsed cleanly; ratio-pack table extracted. Routing held — division ambiguity exceeds tolerance (≥85% required).',
+    lineItems: [
+      { item: 'JL627409', color: 'Black', size: '8',  bc: '05063638140086', qty: 173, cost: 9.62 },
+      { item: 'JL627409', color: 'Black', size: '10', bc: '05063638140000', qty: 346, cost: 9.62 },
+      { item: 'JL627409', color: 'Black', size: '12', bc: '05063638140017', qty: 346, cost: 9.62 },
+      { item: 'JL627409', color: 'Black', size: '14', bc: '05063638140024', qty: 346, cost: 9.62 },
+      { item: 'JL627409', color: 'Black', size: '16', bc: '05063638140031', qty: 173, cost: 9.62 },
+    ],
+  },
+
+  {
+    id: 'msg-004',
+    channel: 'folder',
+    subject: 'PO 461-38931 — dropped to \\\\fs01\\orbitflow\\drop',
+    sender: 'fileshare://fs01/orbitflow/drop',
+    receivedAt: mins(14),
+    files: [{ name: '461-38931 PO.pdf', src: 'mock_orders/raj_461-38931.pdf' }],
+    state: 'incoming',
+    stageIdx: 0, stageProgress: 0,
+    fate: 'done',
+    hidden: true, revealInMs: 22000,
+    extracted: {
+      'External PO #':      { v: '461-38931', conf: 0.99 },
+      'Customer':           { v: 'Raj International Sourcing Ltd', conf: 0.98 },
+      'Supplier':           { v: 'Raj Limited (BPV-019930)', conf: 0.97 },
+      'Factory':            { v: 'Adib Apparels (PLT-BD-CTG-220)', conf: 0.93 },
+      'Inco terms':         { v: 'FOB Chittagong', conf: 0.95 },
+      'Ship mode':          { v: 'Ocean', conf: 0.99 },
+      'Port of exit':       { v: 'Chittagong, Bangladesh', conf: 0.98 },
+      'Port of entry':      { v: 'Felixstowe, UK', conf: 0.94 },
+      'Currency':           { v: 'USD', conf: 1.00 },
+      'Total Qty':          { v: '1,384', conf: 0.99 },
+      'Total Value':        { v: 'USD 13,314.08', conf: 0.99 },
+      'Country of Origin':  { v: 'Bangladesh', conf: 0.99 },
+      'Earliest Handover':  { v: '10-Aug-2026', conf: 0.99 },
+      'Payment Terms':      { v: 'Net 90', conf: 0.99 },
+    },
+    mappings: [
+      { from: 'Brand: FF', to: 'Brand FF (Fashion Forward)', conf: 0.96 },
+      { from: 'Category: Womens Casual', to: 'Division 06 — Womens Casual', conf: 0.91 },
+      { from: 'Vendor: Raj Limited (1007679)', to: 'BPV-019930 (Raj Limited)', conf: 0.97 },
+      { from: 'Hub: Bangladesh', to: 'Sourcing Hub BD-CTG', conf: 0.98 },
+    ],
+    aiNote: 'Vendor mapping resolved from learned history (item msg-003 will inherit once user confirms). Routing to standard hub.',
+    lineItems: [
+      { item: 'JL627409', color: 'Black', size: '10', bc: '05063638140000', qty: 346, cost: 9.62 },
+      { item: 'JL627409', color: 'Black', size: '12', bc: '05063638140017', qty: 346, cost: 9.62 },
+    ],
+    erp: { doc: 'ZPO-100022844', plant: 'BD220 — Chittagong Hub', buyerGroup: 'WW-CSL', requestedDelivery: '10-Aug-2026' },
+  },
+
+  // Pre-existing items already in done/exception (history)
+  {
+    id: 'msg-h001',
+    channel: 'email',
+    subject: 'PO 2450118 — COTTON TEE PACK SS27 (BrightKids)',
+    sender: 'orders@brightkids-buying.com',
+    receivedAt: mins(48),
+    files: [{ name: 'BrightKids PO 2450118.pdf', src: 'mock_orders/brightkids_2450187.pdf' }],
+    state: 'done',
+    extracted: {
+      'External PO #': { v: '2450118', conf: 0.99 },
+      'Customer': { v: 'BrightKids Buying Co.', conf: 0.99 },
+      'Currency': { v: 'USD', conf: 1.0 },
+      'Total Qty': { v: '8,400', conf: 0.99 },
+      'Total Value': { v: 'USD 41,160.00', conf: 0.99 },
+      'Country of Origin': { v: 'Bangladesh', conf: 0.99 },
+      'Shipment Date': { v: '02-Jul-2026', conf: 0.99 },
+    },
+    mappings: [
+      { from: '432 BOYS 3-16', to: 'Division 04 — Kidswear (Boys)', conf: 0.99 },
+      { from: '432001 TEES & TOPS', to: 'Category KW-04-TEE', conf: 0.99 },
+      { from: 'Vendor 07821490', to: 'BPV-018221 (BrightKids Sourcing Ltd)', conf: 0.99 },
+    ],
+    erp: {
+      doc: 'ZPO-100022840', plant: 'BD220 — Chittagong Hub',
+      buyerGroup: 'KW-BOYS', requestedDelivery: '02-Jul-2026',
+      postedAt: mins(46), postedBy: 'OrbitFlow AI', sapStatus: 'Released',
+    },
+    lineItems: [
+      { sku: '4320-51800-6103-001 / 3-4Y',  bc: '5078912330011', qty: 480, cost: 4.90 },
+      { sku: '4320-51800-6103-001 / 5-6Y',  bc: '5078912330035', qty: 920, cost: 4.90 },
+      { sku: '4320-51800-6103-001 / 7-8Y',  bc: '5078912330059', qty: 1320, cost: 4.90 },
+    ],
+  },
+
+  {
+    id: 'msg-h002',
+    channel: 'folder',
+    subject: 'PO 461-38812 — JKT PUFFER NAVY',
+    sender: 'fileshare://fs01/orbitflow/drop',
+    receivedAt: mins(95),
+    files: [{ name: '461-38812 PO.pdf', src: 'mock_orders/raj_461-38931.pdf' }],
+    state: 'exception',
+    extracted: {
+      'External PO #': { v: '461-38812', conf: 0.99 },
+      'Customer': { v: 'Raj International Sourcing Ltd', conf: 0.98 },
+      'Style No': { v: 'JL627002', conf: 0.99 },
+      'Description': { v: 'AW26 FF JKT PUFFER NAVY', conf: 0.97 },
+      'Currency': { v: 'USD', conf: 1.0 },
+      'Total Qty': { v: null, conf: 0, missing: true },
+      'Total Value': { v: 'USD 28,402.10', conf: 0.96 },
+      'Country of Origin': { v: 'Vietnam', conf: 0.95 },
+      'Earliest Handover': { v: null, conf: 0, missing: true },
+    },
+    mappings: [
+      { from: 'Category: Womens Outerwear', to: 'Division 02 — Womenswear', conf: 0.93 },
+      { from: 'Vendor: Raj Limited', to: 'BPV-019930 (Raj Limited)', conf: 0.97 },
+      { from: 'Factory: VN-HCM-220', to: '⚠ Plant not in master', conf: 0.41, warn: true },
+    ],
+    issues: [
+      { kind: 'warn', h: 'Total quantity missing', d: 'Detected ratio packs but totals row was unreadable (smudged scan). Manual entry required.' },
+      { kind: 'warn', h: 'Earliest handover date missing', d: 'No date found in transit block.' },
+      { kind: 'warn', h: 'Factory plant not in master', d: 'VN-HCM-220 is unknown. Pick existing or request creation.' },
+    ],
+    aiNote: 'Document is a low-quality scan. 3 fields require manual completion before routing.',
+    lineItems: [
+      { sku: 'JL627002 / Navy / S', bc: '05063638140111', qty: null, cost: 18.40 },
+      { sku: 'JL627002 / Navy / M', bc: '05063638140128', qty: null, cost: 18.40 },
+      { sku: 'JL627002 / Navy / L', bc: '05063638140135', qty: null, cost: 18.40 },
+    ],
+  },
+
+  // -------- dummy historical 'done' inventory --------
+  ...makeDummyDone([
+    { brand: 'Alder & Finch',     po: '2450099', desc: 'COTTON CABLE KNIT JUMPER', div: 'Division 04 — Kidswear (Boys)',    plant: 'BD220 — Chittagong Hub',    qty: 6240,  val: 38_510.00, ago: 130, ch: 'email',  buyer: 'KW-BOYS',  curr: 'USD' },
+    { brand: 'Westbourne Collective', po: '2450081', desc: 'OVERSIZED TEE PACK',  div: 'Division 02 — Womenswear',           plant: 'CN104 — Qingdao Hub',     qty: 4800,  val: 27_840.00, ago: 175, ch: 'email',  buyer: 'WW-CSL',   curr: 'USD' },
+    { brand: 'Harbor Thread Co.', po: '461-38740', desc: 'LINEN BLEND TROUSER',   div: 'Division 02 — Womenswear',           plant: 'BD220 — Chittagong Hub',    qty: 3120,  val: 19_344.00, ago: 220, ch: 'folder', buyer: 'WW-CSL',   curr: 'USD' },
+    { brand: 'North Vale Apparel', po: 'NV-77821', desc: 'SHERPA LINED HOODIE',   div: 'Division 04 — Kidswear (Boys)',    plant: 'VN112 — HCMC Hub',          qty: 2980,  val: 23_244.00, ago: 240, ch: 'email',  buyer: 'KW-BOYS',  curr: 'USD' },
+    { brand: 'Lumen Streetwear',  po: 'LS-22019', desc: 'GRAPHIC PRINT TEE',      div: 'Division 09 — Active',              plant: 'CN104 — Qingdao Hub',     qty: 5500,  val: 31_350.00, ago: 290, ch: 'upload', buyer: 'ACT-MENS', curr: 'USD' },
+    { brand: 'Brixton Ridge',     po: 'BR-44102', desc: 'STRETCH CHINO SHORT',    div: 'Division 01 — Menswear',             plant: 'BD220 — Chittagong Hub',    qty: 4100,  val: 28_290.00, ago: 320, ch: 'email',  buyer: 'MW-BTM',   curr: 'USD' },
+    { brand: 'Stone & Harbor',    po: 'SH-90021', desc: 'WOOL BLEND OVERCOAT',    div: 'Division 01 — Menswear',             plant: 'CN104 — Qingdao Hub',     qty: 1280,  val: 64_640.00, ago: 360, ch: 'email',  buyer: 'MW-OUT',   curr: 'USD' },
+    { brand: 'Mercer Lane',       po: 'ML-31188', desc: 'SILK BLEND BLOUSE',      div: 'Division 02 — Womenswear',           plant: 'IN088 — Tirupur Hub',      qty: 2240,  val: 17_920.00, ago: 410, ch: 'folder', buyer: 'WW-TOP',   curr: 'USD' },
+    { brand: 'Atelier Virel',     po: 'AV-10044', desc: 'PLEATED MIDI SKIRT',     div: 'Division 02 — Womenswear',           plant: 'PT022 — Porto Hub',        qty: 1480,  val: 22_348.00, ago: 480, ch: 'email',  buyer: 'WW-BTM',   curr: 'EUR' },
+    { brand: 'Maison Calder',     po: 'MC-50271', desc: 'CASHMERE V-NECK JUMPER', div: 'Division 02 — Womenswear',           plant: 'CN104 — Qingdao Hub',     qty:  860,  val: 41_280.00, ago: 540, ch: 'email',  buyer: 'WW-TOP',   curr: 'USD',
+      failed: true, failReason: 'SAP rejected ZPO posting: tax classification (TAXKM) missing for plant CN104. Master data team has been notified.' },
+    { brand: 'Élan District',     po: 'ED-66902', desc: 'METALLIC FOIL TEE',      div: 'Division 09 — Active',              plant: 'CN104 — Qingdao Hub',     qty: 3300,  val: 19_140.00, ago: 600, ch: 'upload', buyer: 'ACT-WMNS', curr: 'USD' },
+    { brand: 'Verro Studio',      po: 'VS-12388', desc: 'TECH NYLON ANORAK',      div: 'Division 09 — Active',              plant: 'VN112 — HCMC Hub',          qty: 1900,  val: 36_290.00, ago: 700, ch: 'email',  buyer: 'ACT-MENS', curr: 'USD' },
+    { brand: 'Urban Stitch Co.',  po: 'USC-7720', desc: 'DENIM TRUCKER JACKET',   div: 'Division 01 — Menswear',             plant: 'BD220 — Chittagong Hub',    qty: 2560,  val: 30_720.00, ago: 820, ch: 'folder', buyer: 'MW-OUT',   curr: 'USD' },
+    { brand: 'Threadline Basics', po: 'TLB-3401', desc: 'CREW NECK BASIC TEE 5PK',div: 'Division 04 — Kidswear (Boys)',    plant: 'IN088 — Tirupur Hub',      qty: 9800,  val: 39_200.00, ago: 960, ch: 'email',  buyer: 'KW-BOYS',  curr: 'USD' },
+    { brand: 'Evermode Apparel',  po: 'EM-88129', desc: 'MERINO BASE LAYER',      div: 'Division 09 — Active',              plant: 'CN104 — Qingdao Hub',     qty: 2100,  val: 25_410.00, ago: 1140, ch: 'email', buyer: 'ACT-MENS', curr: 'USD' },
+  ]),
+];
+
+function makeDummyDone(rows) {
+  return rows.map((r, idx) => {
+    const pad = String(100022700 + idx).padStart(9, '0');
+    return {
+      id: 'msg-d' + String(idx + 1).padStart(3, '0'),
+      channel: r.ch,
+      subject: `PO ${r.po} — ${r.desc} (${r.brand})`,
+      sender: r.ch === 'email'  ? `orders@${r.brand.toLowerCase().replace(/[^a-z]+/g,'')}.com`
+            : r.ch === 'folder' ? 'fileshare://fs01/orbitflow/drop'
+            :                     'm.wong@neotangent.com (manual upload)',
+      receivedAt: mins(r.ago),
+      files: [{ name: `${r.brand} PO ${r.po}.pdf`, src: 'mock_orders/brightkids_2450187.pdf' }],
+      state: 'done',
+      hidden: false,
+      extracted: {
+        'External PO #':     { v: r.po, conf: 0.99 },
+        'Customer':          { v: r.brand, conf: 0.98 },
+        'Supplier':          { v: `${r.brand} Sourcing (BPV-${pad.slice(-6)})`, conf: 0.97 },
+        'Factory':           { v: r.plant.replace(/^[A-Z0-9]+ — /, '') + ' (PLT-' + r.plant.split(' — ')[0] + ')', conf: 0.94 },
+        'Description':       { v: r.desc, conf: 0.97 },
+        'Inco terms':        { v: ['FOB ' + r.plant.split(' — ')[1], 'CIF Felixstowe', 'DDP Newark', 'FCA Origin'][idx % 4], conf: 0.95 },
+        'Ship mode':         { v: idx % 7 === 0 ? 'Air' : 'Ocean', conf: 0.99 },
+        'Port of exit':      { v: r.plant.split(' — ')[1] || r.plant, conf: 0.97 },
+        'Port of entry':     { v: ['Newark, NJ','Felixstowe, UK','Long Beach, CA','Rotterdam, NL'][idx % 4], conf: 0.96 },
+        'Currency':          { v: r.curr, conf: 1.00 },
+        'Total Qty':         { v: r.qty.toLocaleString(), conf: 0.99 },
+        'Total Value':       { v: `${r.curr} ${r.val.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`, conf: 0.99 },
+        'Country of Origin': { v: r.plant.includes('Chittagong') ? 'Bangladesh' : r.plant.includes('Qingdao') ? 'China' : r.plant.includes('HCMC') ? 'Vietnam' : r.plant.includes('Tirupur') ? 'India' : 'Portugal', conf: 0.98 },
+        'Ship date':         { v: ['12-Jul-2026','28-Jul-2026','15-Aug-2026','02-Sep-2026','22-Sep-2026'][idx % 5], conf: 0.99 },
+        'Payment Terms':     { v: ['Net 60','Net 90','Net 120'][idx % 3], conf: 0.99 },
+      },
+      mappings: [
+        { from: `Vendor: ${r.brand}`, to: `BPV-${pad.slice(-6)} (${r.brand})`, conf: 0.99 },
+        { from: `Category internal`,  to: r.div, conf: 0.97 },
+        { from: `Sourcing hub`,       to: r.plant.split(' — ')[1] || r.plant, conf: 0.98 },
+      ],
+      aiNote: 'Routed without exception. Vendor template recognised; all required fields above confidence threshold.',
+      lineItems: [
+        { item: r.po, color: ['Black','Navy','Charcoal','Stone','Olive','Cream'][idx % 6], size: 'S',  bc: '5060000' + (1000 + idx*7), qty: Math.round(r.qty*0.18), cost: +(r.val/r.qty*0.95).toFixed(2) },
+        { item: r.po, color: ['Black','Navy','Charcoal','Stone','Olive','Cream'][idx % 6], size: 'M',  bc: '5060000' + (2000 + idx*7), qty: Math.round(r.qty*0.32), cost: +(r.val/r.qty).toFixed(2) },
+        { item: r.po, color: ['Black','Navy','Charcoal','Stone','Olive','Cream'][idx % 6], size: 'L',  bc: '5060000' + (3000 + idx*7), qty: Math.round(r.qty*0.30), cost: +(r.val/r.qty).toFixed(2) },
+        { item: r.po, color: ['Black','Navy','Charcoal','Stone','Olive','Cream'][idx % 6], size: 'XL', bc: '5060000' + (4000 + idx*7), qty: Math.round(r.qty*0.20), cost: +(r.val/r.qty*1.05).toFixed(2) },
+      ],
+      erp: r.failed ? {
+        doc: null,
+        plant: r.plant,
+        buyerGroup: r.buyer,
+        requestedDelivery: ['12-Jul-2026','28-Jul-2026','15-Aug-2026','02-Sep-2026','22-Sep-2026'][idx % 5],
+        sapStatus: 'Failed',
+        failureReason: r.failReason || 'SAP rejected: tax classification missing for plant.',
+      } : {
+        doc: 'ZPO-' + pad,
+        plant: r.plant,
+        buyerGroup: r.buyer,
+        requestedDelivery: ['12-Jul-2026','28-Jul-2026','15-Aug-2026','02-Sep-2026','22-Sep-2026'][idx % 5],
+        postedAt: mins(r.ago - 0.5),
+        postedBy: idx % 4 === 0 ? 'M. Wong' : 'OrbitFlow AI',
+        sapStatus: 'Released',
+      },
+    };
+  });
+}
+
+// ---------- helpers ----------
+const $ = (s, root=document) => root.querySelector(s);
+const $$ = (s, root=document) => [...root.querySelectorAll(s)];
+const fmtTime = (iso) => {
+  const d = new Date(iso); const diff = (Date.now() - d.getTime())/60000;
+  if (diff < 0.4) return 'just now';
+  if (diff < 1) return '<1m ago';
+  if (diff < 60) return `${Math.floor(diff)}m ago`;
+  if (diff < 60*24) return `${Math.floor(diff/60)}h ago`;
+  return `${Math.floor(diff/60/24)}d ago`;
+};
+const itemsBy = (s) => ITEMS
+  .filter(i => i.state === s && !i.hidden)
+  .sort((a,b) => new Date(b.receivedAt) - new Date(a.receivedAt));
+function findItem(id) { return ITEMS.find(i => i.id === id); }
+function escapeHtml(s) { return (s==null?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+function pctOf(it) {
+  return it.state === 'incoming'
+    ? Math.min(100, Math.round((it.stageIdx + (it.stageProgress||0)) / AI_STAGES * 100))
+    : 100;
+}
+
+// schedule reveal times for hidden (staggered) items
+ITEMS.forEach(i => { if (i.revealInMs) i.revealAt = Date.now() + i.revealInMs; });
+
+// ---------- state ----------
+const state = {
+  activeTab: 'incoming',
+  selectedId: null,
+  stickyView: null,        // { id, prevState, newState }
+  activePreviewFile: 0,
+  // workspace mount tracking (so iframe is preserved across ticks)
+  mountedItemId: null,
+  mountedFileIdx: null,
+};
+const visitedTabs = new Set(); // suppress enter-animation on first visit per tab
+
+// ---------- counts ----------
+function renderCounts() {
+  $('#cnt-incoming').textContent = itemsBy('incoming').length;
+  $('#cnt-exception').textContent = itemsBy('exception').length;
+  $('#cnt-done').textContent = itemsBy('done').length;
+}
+
+// ====================================================================
+// LIST: diff-based render with enter / leave animations
+// ====================================================================
+function emptyForTab() {
+  return `<div class="list-empty">
+    <div class="icon">⌖</div>
+    <div>No items in <strong>${state.activeTab}</strong></div>
+    <div style="font-size:11.5px;color:var(--text-faint);margin-top:6px;">
+      ${state.activeTab === 'incoming' ? 'OrbitFlow is watching your inbound channels.' :
+        state.activeTab === 'exception' ? 'Nothing needs your attention right now.' :
+        'Routed orders will appear here.'}
+    </div>
+  </div>`;
+}
+function listItemInnerHtml(it) {
+  const stage = STAGES[it.stageIdx] || STAGES[0];
+  const channelLbl = { email: 'Email', upload: 'Upload', folder: 'Folder' }[it.channel];
+  const stateBadge =
+    it.state === 'done'      ? `<span class="badge done li-state-badge">Routed · ${it.erp?.doc||''}</span>` :
+    it.state === 'exception' ? `<span class="badge exception li-state-badge">${(it.issues||[]).length} issue${(it.issues||[]).length===1?'':'s'}</span>` :
+    `<span class="badge processing li-state-badge">${stage.label}</span>`;
+  const pct = pctOf(it);
+  return `
+    <div class="li-row1">
+      <span class="li-channel ${it.channel}">${channelLbl}</span>
+      ${stateBadge}
+      <span class="li-time">${fmtTime(it.receivedAt)}</span>
+    </div>
+    <div class="li-subject">${escapeHtml(it.subject)}</div>
+    <div class="li-meta">
+      <span>${escapeHtml(it.sender)}</span>
+      <span class="sep">·</span>
+      <span>${it.files.length} file${it.files.length===1?'':'s'}</span>
+    </div>
+    ${it.state === 'incoming' ? `
+      <div class="li-status">
+        <div class="stage-spin"></div>
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <span class="num li-pct" style="font-size:11px;color:var(--text-faint);min-width:28px;text-align:right;">${pct}%</span>
+      </div>` : ''}
+  `;
+}
+function makeListItem(it) {
+  const el = document.createElement('div');
+  el.className = 'list-item';
+  el.dataset.id = it.id;
+  if (state.selectedId === it.id) el.classList.add('selected');
+  el.innerHTML = listItemInnerHtml(it);
+  el.addEventListener('click', () => {
+    if (state.selectedId === it.id) return;
+    state.selectedId = it.id;
+    state.stickyView = null;
+    state.activePreviewFile = 0;
+    $$('.list-item.selected', el.parentNode).forEach(x => x.classList.remove('selected'));
+    el.classList.add('selected');
+    renderWorkspace();
+  });
+  return el;
+}
+function updateListItem(el, it) {
+  el.classList.toggle('selected', state.selectedId === it.id);
+  const pct = pctOf(it);
+  const fill = el.querySelector('.progress-fill');
+  if (fill) fill.style.width = pct + '%';
+  const pctLbl = el.querySelector('.li-pct');
+  if (pctLbl) pctLbl.textContent = pct + '%';
+  const tLbl = el.querySelector('.li-time');
+  if (tLbl) tLbl.textContent = fmtTime(it.receivedAt);
+  const badge = el.querySelector('.li-state-badge');
+  if (badge && it.state === 'incoming') badge.textContent = (STAGES[it.stageIdx]||STAGES[0]).label;
+}
+function renderList() {
+  const items = itemsBy(state.activeTab);
+  const root = $('#listScroll');
+  const isFirstVisit = !visitedTabs.has(state.activeTab);
+
+  // Remove empty state if items present
+  const emptyEl = root.querySelector('.list-empty');
+  if (items.length && emptyEl) emptyEl.remove();
+
+  // Mark items that should leave
+  $$('.list-item:not(.leaving)', root).forEach(el => {
+    if (!items.find(i => i.id === el.dataset.id)) {
+      el.classList.add('leaving');
+      setTimeout(() => { if (el.parentNode) el.remove(); }, 460);
+    }
+  });
+
+  // Insert / update + reorder
+  items.forEach((it, idx) => {
+    let el = root.querySelector(`.list-item[data-id="${CSS.escape(it.id)}"]:not(.leaving)`);
+    if (!el) {
+      el = makeListItem(it);
+      if (!isFirstVisit) {
+        el.classList.add('entering');
+        el.classList.add('flash-enter');
+        setTimeout(() => el.classList.remove('flash-enter'), 1200);
+      }
+      const live = $$('.list-item:not(.leaving)', root);
+      const ref = live[idx] || null;
+      root.insertBefore(el, ref);
+      if (!isFirstVisit) {
+        requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('entering')));
+      }
+    } else {
+      updateListItem(el, it);
+      const live = $$('.list-item:not(.leaving)', root);
+      if (live[idx] !== el) {
+        const ref = live[idx] || null;
+        root.insertBefore(el, ref);
+      }
+    }
+  });
+
+  if (!items.length && !root.querySelector('.list-empty')) {
+    setTimeout(() => {
+      if (!root.querySelector('.list-item:not(.leaving)') && !root.querySelector('.list-empty') && !itemsBy(state.activeTab).length) {
+        root.innerHTML = emptyForTab();
+      }
+    }, 480);
+  }
+
+  visitedTabs.add(state.activeTab);
+}
+
+// ====================================================================
+// WORKSPACE: mount-once-per-item + soft-update on tick
+// (so the PDF iframe is never recreated by progress updates)
+// ====================================================================
+function workEmptyHtml() {
+  return `<div class="work-empty">
+    <div class="big">
+      <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+    </div>
+    <div>Select an item to inspect</div>
+    <div style="font-size:11.5px;color:var(--text-faint);">OrbitFlow streams inbound documents from email, watched folders, and manual uploads</div>
+  </div>`;
+}
+function bannerHtml(banner) {
+  if (!banner) return '';
+  const isWarn = banner.kind === 'warn';
+  return `<div class="work-banner ${isWarn ? 'warn' : ''}">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+      ${isWarn
+        ? '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
+        : '<polyline points="20 6 9 17 4 12"/>'}
+    </svg>
+    <div>${banner.text}</div>
+    <button data-banner-action>${escapeHtml(banner.action.label)}</button>
+  </div>`;
+}
+function headerActionsHtml(item) {
+  if (item.state === 'done') return `
+    <button class="btn ghost" onclick="window.open('${item.files[0].src}','_blank')">Open file</button>
+    <button class="btn">Open in ERP</button>`;
+  if (item.state === 'exception') return `
+    <button class="btn ghost">Reject</button>
+    <button class="btn ghost">Reassign</button>
+    <button class="btn success" onclick="completeException('${item.id}')">Approve & Route</button>`;
+  return `
+    <button class="btn ghost">Pause AI</button>
+    <button class="btn ghost">Force exception</button>`;
+}
+function previewTabsHtml(item) {
+  return `<div class="preview-tabs">
+    ${item.files.map((f,i) => `
+      <button class="preview-tab ${i === state.activePreviewFile ? 'active' : ''}" data-fi="${i}">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        ${escapeHtml(f.name)}
+      </button>
+    `).join('')}
+  </div>`;
+}
+function workspaceShellHtml(item) {
+  const channelLbl = { email: 'Email inbox', upload: 'Manual upload', folder: 'Folder watcher' }[item.channel];
+  const file = item.files[state.activePreviewFile] || item.files[0];
+  return `
+    <div class="work-banner-slot"></div>
+    <div class="work-header">
+      <div class="work-title-row">
+        <div style="min-width:0;">
+          <div class="work-title">${escapeHtml(item.subject)}</div>
+          <div class="work-sub">
+            <span>${channelLbl}</span><span class="sep">·</span>
+            <span>${escapeHtml(item.sender)}</span><span class="sep">·</span>
+            <span class="ws-time">${fmtTime(item.receivedAt)}</span><span class="sep">·</span>
+            <span>${item.files.length} attachment${item.files.length===1?'':'s'}</span>
+          </div>
+        </div>
+        <div class="work-actions"></div>
+      </div>
+    </div>
+    <div class="pipeline-slot"></div>
+    <div class="work-body">
+      <div class="inspector-col">
+        <div class="exception-summary-slot"></div>
+        <div class="inspector-content"></div>
+      </div>
+      <div class="col-divider" id="colDivider"></div>
+      <div class="preview-col">
+        ${item.files.length > 1 ? previewTabsHtml(item) : ''}
+        <div class="preview-frame">
+          <iframe src="${file.src}#view=FitH&toolbar=0" title="PDF preview"></iframe>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ---- Pipeline (horizontal) ----
+function pipelineHtml(item) {
+  const isIncoming = item.state === 'incoming';
+  const isException = item.state === 'exception';
+  const isDone = item.state === 'done';
+  const erpFailed = item.erp && item.erp.sapStatus === 'Failed';
+  return `<div class="pipeline-h">
+    ${STAGES.map((s, i) => {
+      let cls = '';
+      let subText = s.sub;
+      let glyph = String(i + 1);
+      if (i < AI_STAGES) {
+        if (!isIncoming) { cls = 'done'; glyph = '✓'; }
+        else if (i < item.stageIdx) { cls = 'done'; glyph = '✓'; }
+        else if (i === item.stageIdx) {
+          cls = 'active';
+          subText = `${s.sub} · ${Math.round((item.stageProgress||0)*100)}%`;
+        }
+      } else if (i === 4) {
+        // Awaiting human review
+        if (isException) { cls = 'review'; glyph = '!'; subText = `${(item.issues||[]).length} issue${(item.issues||[]).length===1?'':'s'} to resolve`; }
+        else if (isDone) { cls = 'na'; subText = 'NA — routed automatically'; glyph = '—'; }
+        else { subText = 'Pending'; }
+      } else if (i === 5) {
+        // Posted to ERP
+        if (erpFailed)      { cls = 'failed'; glyph = '✕'; subText = 'Posting failed'; }
+        else if (isDone)    { cls = 'done';   glyph = '✓'; subText = item.erp?.doc ? `${item.erp.doc} · ${item.erp.sapStatus||'Released'}` : 'Released'; }
+        else if (isException){ subText = 'Pending — held at review'; }
+        else                { subText = 'Pending'; }
+      }
+      return `
+        <div class="step ${cls}">
+          <div class="dot">${glyph}</div>
+          <div class="lbl"><div class="name">${s.label}</div><div class="sub">${escapeHtml(subText)}</div></div>
+        </div>
+        ${i < STAGES.length - 1 ? '<div class="arrow">›</div>' : ''}
+      `;
+    }).join('')}
+  </div>`;
+}
+
+// ---- Pencil-edit infrastructure ----
+const HIGH_CONF = 0.95;
+state.editingFields = state.editingFields || new Set();  // keys: `${itemId}:${fieldName}`
+function editKey(item, field) { return `${item.id}:${field}`; }
+function isEditing(item, field) { return state.editingFields.has(editKey(item, field)); }
+function toggleEdit(itemId, field) {
+  const k = `${itemId}:${field}`;
+  if (state.editingFields.has(k)) state.editingFields.delete(k);
+  else state.editingFields.add(k);
+  // bump sig so inspector re-renders
+  const slot = $('.inspector-content');
+  if (slot) slot.dataset.sig = '';
+  renderWorkspace();
+}
+window.toggleEdit = toggleEdit;
+
+function parseLine(l) {
+  if (l.item != null || l.color != null || l.size != null) {
+    return { item: l.item || '', color: l.color || '—', size: l.size || '—' };
+  }
+  const parts = (l.sku || '').split(' / ').map(p => p.trim());
+  if (parts.length >= 3) return { item: parts[0], color: parts[1], size: parts[2] };
+  if (parts.length === 2) return { item: parts[0], color: '—', size: parts[1] };
+  return { item: parts[0] || '', color: '—', size: '—' };
+}
+
+function fieldValueCellHtml(item, key, e, allowEdit) {
+  // Missing field handling (exception state)
+  const isException = item.state === 'exception';
+  if (e.missing && isException) {
+    if (e.options) {
+      return `<select class="inline" data-field="${key}">
+        <option value="">— Select —</option>
+        ${e.options.map(o => `<option>${escapeHtml(o)}</option>`).join('')}
+      </select>`;
+    }
+    return `<input class="inline" placeholder="${escapeHtml(e.suggest || 'Required')}" data-field="${key}" />`;
+  }
+  if (e.missing) {
+    return `<span class="missing" style="color:var(--warning);font-style:italic;">— missing —</span>${
+      allowEdit ? ` <button class="field-edit" title="Add value" onclick="toggleEdit('${item.id}','${key}')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </button>` : ''}`;
+  }
+  const editing = allowEdit && isEditing(item, key);
+  if (editing) {
+    return `<input class="inline editmode" data-field="${key}" value="${escapeHtml(e.v)}" />
+      <button class="field-edit" title="Done" onclick="toggleEdit('${item.id}','${key}')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      </button>`;
+  }
+  const locked = e.conf >= HIGH_CONF;
+  const pencil = allowEdit ? `<button class="field-edit ${locked ? 'locked' : ''}"
+        title="${locked ? 'High-confidence value — click to edit anyway' : 'Edit value'}"
+        onclick="toggleEdit('${item.id}','${key}')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </button>` : '';
+  return `<span class="val">${escapeHtml(e.v)}<span class="conf">${(e.conf*100).toFixed(0)}%</span></span>${pencil}`;
+}
+
+function exceptionSummaryHtml(item) {
+  if (item.state !== 'exception' || !item.issues?.length) return '';
+  return `<div class="exception-summary">
+    <div class="head">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      ${item.issues.length} issue${item.issues.length===1?'':'s'} — awaiting your review
+    </div>
+    ${item.issues.map(iss => `
+      <div class="issue-line"><div><strong>${escapeHtml(iss.h)}.</strong>${escapeHtml(iss.d)}</div></div>
+    `).join('')}
+  </div>`;
+}
+
+function inspectorHtml(item) {
+  const isIncoming = item.state === 'incoming';
+  const isException = item.state === 'exception';
+  const isDone = item.state === 'done';
+  const allowEdit = isException || isDone;
+  const erpFailed = item.erp && item.erp.sapStatus === 'Failed';
+
+  // ===== PO details (extracted fields) =====
+  const extractedHtml = `
+    <div class="insp-section">
+      <div class="insp-title">PO details <span class="ai-tag">AI-extracted</span></div>
+      <dl class="insp-grid">
+        ${Object.entries(item.extracted).map(([k, e]) => {
+          return `<dt>${escapeHtml(k)}</dt><dd><div class="field-row">${fieldValueCellHtml(item, k, e, allowEdit)}</div></dd>`;
+        }).join('')}
+      </dl>
+    </div>
+  `;
+
+  // ===== Mappings (taxonomy) =====
+  const mappingsHtml = item.mappings?.length ? `
+    <div class="insp-section">
+      <div class="insp-title">External → Internal taxonomy <span class="ai-tag">AI</span></div>
+      ${item.mappings.map(m => `
+        <div class="map-row">
+          <div class="map-from">${escapeHtml(m.from)}</div>
+          <div class="map-arrow">→</div>
+          <div class="map-to" style="${m.warn ? 'color:var(--warning);' : ''}">
+            ${escapeHtml(m.to)}<span class="conf">${(m.conf*100).toFixed(0)}%</span>
+          </div>
+        </div>`).join('')}
+    </div>` : '';
+
+  // ===== AI note =====
+  const noteHtml = item.aiNote ? `
+    <div class="insp-section">
+      <div class="ai-thoughts">
+        <div class="label">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14.39 8.5 21 9.27l-5 4.87 1.18 6.86L12 17.77 6.82 21l1.18-6.86-5-4.87 6.61-.77z"/></svg>
+          AI Reasoning
+        </div>
+        ${escapeHtml(item.aiNote)}
+      </div>
+    </div>` : '';
+
+  // ===== Line items (Item / Color / Size / Barcode / Qty / Cost) =====
+  const linesHtml = item.lineItems?.length ? `
+    <div class="insp-section">
+      <div class="insp-title">Line items <span class="badge muted" style="margin-left:4px;">${item.lineItems.length} shown</span></div>
+      <table class="li-table">
+        <thead><tr>
+          <th>Item</th><th>Color</th><th>Size</th><th>Barcode</th><th class="num">Qty</th><th class="num">Unit cost</th>
+        </tr></thead>
+        <tbody>
+          ${item.lineItems.map(l => {
+            const p = parseLine(l);
+            return `<tr>
+              <td style="font-family:'JetBrains Mono',monospace;font-size:11.5px;">${escapeHtml(p.item)}</td>
+              <td>${escapeHtml(p.color)}</td>
+              <td class="num">${escapeHtml(p.size)}</td>
+              <td class="num" style="color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:11.5px;">${escapeHtml(l.bc||'')}</td>
+              <td class="num">${l.qty == null ? '<span style="color:var(--warning);">—</span>' : l.qty.toLocaleString()}</td>
+              <td class="num">${l.cost == null ? '—' : l.cost.toFixed(2)}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>` : '';
+
+  // ===== ERP block (success or failure) =====
+  const erpHtml = ((isDone || erpFailed) && item.erp) ? `
+    <div class="insp-section">
+      <div class="insp-title">ERP routing</div>
+      ${erpFailed ? `
+        <div class="erp-failure-banner">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <div><strong>SAP posting failed</strong>${escapeHtml(item.erp.failureReason || 'No reason returned by SAP.')}</div>
+        </div>` : ''}
+      <dl class="insp-grid">
+        <dt>SAP Document</dt><dd>${item.erp.doc ? `<strong>${escapeHtml(item.erp.doc)}</strong>` : '<span style="color:var(--text-faint);">— not yet assigned —</span>'}</dd>
+        <dt>Plant</dt><dd>${escapeHtml(item.erp.plant||'—')}</dd>
+        <dt>Buyer Group</dt><dd>${escapeHtml(item.erp.buyerGroup||'—')}</dd>
+        <dt>Requested Delivery</dt><dd>${escapeHtml(item.erp.requestedDelivery||'—')}</dd>
+        ${item.erp.postedAt ? `<dt>Posted</dt><dd>${fmtTime(item.erp.postedAt)} by ${escapeHtml(item.erp.postedBy||'OrbitFlow AI')}</dd>` : ''}
+        <dt>SAP Status</dt><dd>${
+          erpFailed ? `<span class="badge failed">Failed</span>` :
+          item.erp.sapStatus ? `<span class="badge done">${escapeHtml(item.erp.sapStatus)}</span>` :
+          '<span class="badge muted">Pending</span>'
+        }</dd>
+      </dl>
+      ${erpFailed ? `<div style="margin-top:10px;display:flex;gap:6px;">
+        <button class="btn ghost">Open SAP log</button>
+        <button class="btn">Retry posting</button>
+      </div>` : ''}
+    </div>` : '';
+
+  return [extractedHtml, mappingsHtml, noteHtml, linesHtml, erpHtml].join('');
+}
+function setBanner(pane, banner) {
+  const slot = pane.querySelector('.work-banner-slot');
+  if (!slot) return;
+  const newKey = banner ? (banner.kind + '|' + banner.text) : '';
+  if (slot.dataset.key === newKey) return;
+  slot.dataset.key = newKey;
+  slot.innerHTML = bannerHtml(banner);
+  if (banner && banner.action) {
+    const btn = slot.querySelector('[data-banner-action]');
+    if (btn) btn.onclick = (e) => { e.preventDefault(); banner.action.go(); };
+  }
+}
+function setHeaderActions(pane, item) {
+  const slot = pane.querySelector('.work-actions');
+  if (!slot) return;
+  if (slot.dataset.state === item.state) return;
+  slot.dataset.state = item.state;
+  slot.innerHTML = headerActionsHtml(item);
+}
+function setInspector(pane, item) {
+  // Pipeline (always visible at top)
+  const pipeSlot = pane.querySelector('.pipeline-slot');
+  if (pipeSlot) {
+    const pSig = item.id + '|' + item.state + '|' + item.stageIdx + '|' + Math.round((item.stageProgress||0)*20) + '|' + (item.erp?.sapStatus||'');
+    if (pipeSlot.dataset.sig !== pSig) {
+      pipeSlot.dataset.sig = pSig;
+      pipeSlot.innerHTML = pipelineHtml(item);
+    }
+  }
+  // Exception summary (only when state==='exception')
+  const exSlot = pane.querySelector('.exception-summary-slot');
+  if (exSlot) {
+    const eSig = item.id + '|' + item.state + '|' + (item.issues||[]).length;
+    if (exSlot.dataset.sig !== eSig) {
+      exSlot.dataset.sig = eSig;
+      exSlot.innerHTML = exceptionSummaryHtml(item);
+    }
+  }
+  // Inspector content (PO details + mappings + AI note + line items + ERP)
+  const slot = pane.querySelector('.inspector-content');
+  if (!slot) return;
+  const editSig = [...state.editingFields].filter(k => k.startsWith(item.id+':')).sort().join(',');
+  const sig = item.id + '|' + item.state + '|' + item.stageIdx + '|' + Math.round((item.stageProgress||0)*20) + '|' + (item.erp?.sapStatus||'') + '|' + editSig;
+  if (slot.dataset.sig === sig) return;
+  slot.dataset.sig = sig;
+  // preserve focused input value/selection
+  const active = document.activeElement;
+  const inside = active && slot.contains(active);
+  const focusKey = inside ? active.dataset.field : null;
+  const focusVal = inside ? active.value : null;
+  const selStart = inside && active.selectionStart != null ? active.selectionStart : null;
+  slot.innerHTML = inspectorHtml(item);
+  if (focusKey) {
+    const restored = slot.querySelector(`[data-field="${CSS.escape(focusKey)}"]`);
+    if (restored) {
+      if (focusVal != null) restored.value = focusVal;
+      restored.focus();
+      if (selStart != null && restored.setSelectionRange) {
+        try { restored.setSelectionRange(selStart, selStart); } catch (_) {}
+      }
+    }
+  }
+}
+function wireWorkspace(pane) {
+  $$('.preview-tab', pane).forEach(t => {
+    t.addEventListener('click', () => {
+      state.activePreviewFile = parseInt(t.dataset.fi, 10);
+      state.mountedItemId = null; // force remount because file changed
+      renderWorkspace();
+    });
+  });
+  // Resizable column divider
+  const div = pane.querySelector('#colDivider');
+  if (div) {
+    div.addEventListener('mousedown', (ev) => {
+      ev.preventDefault();
+      div.classList.add('dragging');
+      const body = div.parentElement;
+      const inspector = body.querySelector('.inspector-col');
+      const preview = body.querySelector('.preview-col');
+      const startX = ev.clientX;
+      const startInsp = inspector.getBoundingClientRect().width;
+      const startPrev = preview.getBoundingClientRect().width;
+      const onMove = (e) => {
+        const dx = e.clientX - startX;
+        const newInsp = Math.max(360, startInsp + dx);
+        const newPrev = Math.max(280, startPrev - dx);
+        inspector.style.flex = `0 0 ${newInsp}px`;
+        preview.style.flex   = `0 0 ${newPrev}px`;
+      };
+      const onUp = () => {
+        div.classList.remove('dragging');
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+  }
+}
+function renderWorkspace() {
+  const pane = $('#paneWork');
+  let item = null, banner = null;
+  if (state.stickyView && state.stickyView.id === state.selectedId) {
+    item = findItem(state.stickyView.id);
+    if (item.state === 'done') {
+      banner = { kind: 'success', text: `Routing complete — moved to <strong>Done</strong>. ERP doc <strong>${item.erp?.doc||''}</strong> created.`, action: { label: 'Open in Done', go: () => switchTab('done', item.id) } };
+    } else if (item.state === 'exception') {
+      banner = { kind: 'warn', text: `AI flagged <strong>${(item.issues||[]).length}</strong> issue${(item.issues||[]).length===1?'':'s'} — moved to <strong>Exception</strong>. Your view was preserved.`, action: { label: 'Open in Exception', go: () => switchTab('exception', item.id) } };
+    }
+  } else if (state.selectedId) {
+    item = findItem(state.selectedId);
+  }
+
+  if (!item) {
+    pane.innerHTML = workEmptyHtml();
+    state.mountedItemId = null;
+    state.mountedFileIdx = null;
+    return;
+  }
+
+  const needMount = state.mountedItemId !== item.id || state.mountedFileIdx !== state.activePreviewFile;
+  if (needMount) {
+    pane.innerHTML = workspaceShellHtml(item);
+    state.mountedItemId = item.id;
+    state.mountedFileIdx = state.activePreviewFile;
+    wireWorkspace(pane);
+  }
+  setBanner(pane, banner);
+  setHeaderActions(pane, item);
+  setInspector(pane, item);
+}
+
+// ---------- tab switching ----------
+function switchTab(tab, selectId) {
+  state.activeTab = tab;
+  if (selectId) {
+    state.selectedId = selectId;
+    state.stickyView = null;
+  } else if (!itemsBy(tab).find(i => i.id === state.selectedId)) {
+    state.selectedId = null;
+    state.stickyView = null;
+    state.mountedItemId = null;
+  }
+  $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  // Wipe list DOM + suppress entry animation on first render of newly-shown tab
+  $('#listScroll').innerHTML = '';
+  visitedTabs.delete(tab);
+  renderList();
+  renderWorkspace();
+}
+
+$$('.tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+
+// ---------- AI simulation loop ----------
+const SIM_TICK_MS = 1100;
+function tick() {
+  // 1. Reveal pending intake items (staggered arrivals)
+  ITEMS.filter(i => i.hidden && i.revealAt && Date.now() >= i.revealAt).forEach(i => {
+    i.hidden = false;
+    i.receivedAt = new Date().toISOString();
+    const ch = { email: 'email inbox', upload: 'manual upload', folder: 'folder watcher' }[i.channel];
+    toast({ kind: 'info', t: `New inbound via ${ch}`, d: i.subject });
+  });
+
+  // 2. Advance progress for incoming items
+  ITEMS.filter(i => i.state === 'incoming' && !i.hidden).forEach(i => {
+    i.stageProgress = (i.stageProgress || 0) + 0.10 + Math.random()*0.10;
+    if (i.stageProgress >= 1) {
+      i.stageProgress = 0;
+      i.stageIdx += 1;
+    }
+    if (i.stageIdx >= AI_STAGES) {
+      const newState = i.fate;
+      i.state = newState;
+      i.stageIdx = AI_STAGES;
+      i.stageProgress = 1;
+      if (state.selectedId === i.id) state.stickyView = { id: i.id, prevState: 'incoming', newState };
+      if (newState === 'done') toast({ kind: 'success', t: 'Routed to ERP', d: `${i.subject.split('—')[0].trim()} → ${i.erp?.doc||''}` });
+      else                     toast({ kind: 'warn',    t: 'Moved to Exception', d: `${i.subject.split('—')[0].trim()} needs review` });
+    }
+  });
+
+  renderCounts();
+  renderList();
+  renderWorkspace();
+}
+
+let simRunning = true;
+let simHandle = setInterval(tick, SIM_TICK_MS);
+
+// ---------- exception completion ----------
+function completeException(id) {
+  const item = findItem(id);
+  if (!item) return;
+  // pretend to validate fields
+  item.state = 'done';
+  // synthesize ERP record
+  item.erp = item.erp || {
+    doc: 'ZPO-' + (100022845 + Math.floor(Math.random()*40)),
+    plant: 'BD220 — Chittagong Hub',
+    buyerGroup: 'WW-CSL',
+    requestedDelivery: '10-Aug-2026',
+    postedAt: new Date().toISOString(),
+    postedBy: 'M. Wong',
+    sapStatus: 'Released',
+  };
+  item.issues = [];
+  toast({ kind: 'success', t: 'Exception resolved', d: `${item.subject.split('—')[0].trim()} routed to ERP` });
+  // jump user to done
+  state.selectedId = id;
+  state.stickyView = null;
+  switchTab('done', id);
+}
+window.completeException = completeException;
+
+// ---------- toasts ----------
+function toast({ kind, t, d }) {
+  const stack = $('#toastStack');
+  const el = document.createElement('div');
+  el.className = `toast ${kind||'info'}`;
+  el.innerHTML = `
+    <div class="ic">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color:${kind==='success'?'var(--success)':kind==='warn'?'var(--warning)':'var(--accent)'};">
+        ${kind==='success' ? '<polyline points="20 6 9 17 4 12"/>' :
+          kind==='warn'    ? '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>' :
+                             '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>'}
+      </svg>
+    </div>
+    <div class="body">
+      <div class="t">${escapeHtml(t)}</div>
+      <div class="d">${escapeHtml(d)}</div>
+    </div>
+  `;
+  stack.appendChild(el);
+  setTimeout(() => {
+    el.style.transition = 'opacity 0.4s, transform 0.4s';
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(8px)';
+    setTimeout(() => el.remove(), 400);
+  }, 4200);
+}
+
+// ---------- demo controls ----------
+$('#simToggle').addEventListener('click', () => {
+  if (simRunning) {
+    clearInterval(simHandle); simRunning = false;
+    $('#simToggle').textContent = '▶ Resume AI worker';
+    toast({ kind: 'info', t: 'AI worker paused', d: 'Items will stay in their current stage.' });
+  } else {
+    simHandle = setInterval(tick, SIM_TICK_MS); simRunning = true;
+    $('#simToggle').textContent = '⚙ Demo controls';
+    toast({ kind: 'info', t: 'AI worker resumed', d: 'Processing will continue.' });
+  }
+});
+
+$('#btnRefresh').addEventListener('click', () => {
+  toast({ kind: 'info', t: 'Inbound channels polled', d: 'No new messages.' });
+});
+
+$('#btnUpload').addEventListener('click', () => {
+  // synth a new incoming item
+  const newItem = {
+    id: 'msg-' + Math.random().toString(36).slice(2,7),
+    channel: 'upload',
+    subject: 'PO 2450' + (200 + Math.floor(Math.random()*99)) + ' — JOGGER PACK SS27 (BrightKids)',
+    sender: 'm.wong@neotangent.com (manual upload)',
+    receivedAt: new Date().toISOString(),
+    files: [{ name: 'BrightKids PO uploaded.pdf', src: 'mock_orders/brightkids_2450187.pdf' }],
+    state: 'incoming',
+    stageIdx: 0, stageProgress: 0,
+    fate: Math.random() < 0.3 ? 'exception' : 'done',
+    extracted: {
+      'External PO #': { v: '2450' + (200 + Math.floor(Math.random()*99)), conf: 0.99 },
+      'Customer': { v: 'BrightKids Buying Co.', conf: 0.98 },
+      'Currency': { v: 'USD', conf: 1.0 },
+      'Total Qty': { v: '4,200', conf: 0.95 },
+    },
+    mappings: [
+      { from: '432 BOYS 3-16', to: 'Division 04 — Kidswear (Boys)', conf: 0.97 },
+      { from: 'Vendor 07821490', to: 'BPV-018221 (BrightKids Sourcing Ltd)', conf: 0.99 },
+    ],
+    aiNote: 'Manual upload received. Queued for parsing.',
+    lineItems: [],
+    erp: { doc: 'ZPO-' + (100022846 + Math.floor(Math.random()*30)),
+           plant: 'BD220 — Chittagong Hub', buyerGroup: 'KW-BOYS', requestedDelivery: '20-Jul-2026' },
+  };
+  ITEMS.unshift(newItem);
+  toast({ kind: 'info', t: 'Upload queued', d: newItem.subject });
+  switchTab('incoming', newItem.id);
+});
+
+$('#btnSources').addEventListener('click', () => {
+  toast({ kind: 'info', t: 'Inbound channels', d: 'Email · Folder watcher · Manual upload — all healthy' });
+});
+
+// ---------- search ----------
+$('#searchInput').addEventListener('input', (e) => {
+  const q = e.target.value.toLowerCase().trim();
+  $$('.list-item').forEach(el => {
+    const text = el.textContent.toLowerCase();
+    el.style.display = !q || text.includes(q) ? '' : 'none';
+  });
+});
+
+// ---------- collapse list pane ----------
+$('#collapseList').addEventListener('click', () => {
+  $('#paneList').classList.toggle('collapsed');
+});
+
+// ---------- init ----------
+// =================== STATIC VIEWS ===================
+function renderDashboardView() {
+  const c = $('#view-dashboard');
+  if (!c) return;
+  // Build 14-day fake series
+  const days = [];
+  const labels = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    labels.push(d.toLocaleDateString(undefined, { weekday: 'short' }).slice(0,2) + ' ' + d.getDate());
+    const base = 12 + Math.round(8 * Math.sin(i*0.6) + Math.random()*5);
+    const held = Math.max(0, Math.round(2 + Math.random()*3 - (i%5===0?1:0)));
+    const failed = (i === 1 || i === 6) ? 1 : 0;
+    days.push({ routed: base, held, failed });
+  }
+  const maxV = Math.max(...days.map(d => d.routed + d.held + d.failed));
+
+  c.innerHTML = `
+    <div class="page">
+      <div class="page-inner">
+        <div class="page-header">
+          <div class="crumb">My workspace</div>
+          <h1>Good morning, M. Wong</h1>
+          <div class="sub">Here's what's on your desk today — 1 exception waiting on you, 1 SAP failure to retry.</div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi warn">
+            <div class="label">My exceptions</div>
+            <div class="v">1</div>
+            <div class="delta neut">awaiting your review</div>
+            <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          </div>
+          <div class="kpi">
+            <div class="label">My postings today</div>
+            <div class="v">7</div>
+            <div class="delta up">▲ +2 vs avg</div>
+            <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          </div>
+          <div class="kpi alert">
+            <div class="label">SAP failures (mine)</div>
+            <div class="v">1</div>
+            <div class="delta down">requires retry</div>
+            <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+          </div>
+          <div class="kpi">
+            <div class="label">Avg time to ERP</div>
+            <div class="v">3m 42s</div>
+            <div class="delta up">▼ 18s vs last week</div>
+            <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          </div>
+          <div class="kpi">
+            <div class="label">Oldest in queue</div>
+            <div class="v">8m</div>
+            <div class="delta neut">PO 2450187 · BrightKids</div>
+            <div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg></div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="section">
+            <div class="section-h"><h2>My throughput · last 14 days</h2><div class="meta">Inflow split by outcome</div></div>
+            <div class="section-body">
+              <div class="chart">
+                ${days.map(d => {
+                  const total = d.routed + d.held + d.failed;
+                  const h = (v) => `${(v / maxV * 170).toFixed(1)}px`;
+                  return `<div class="col" title="${total} orders · ${d.routed} routed, ${d.held} held, ${d.failed} failed">
+                    ${d.failed ? `<div class="seg failed" style="height:${h(d.failed)}"></div>` : ''}
+                    ${d.held   ? `<div class="seg held"   style="height:${h(d.held)}"></div>`   : ''}
+                    ${d.routed ? `<div class="seg routed" style="height:${h(d.routed)}"></div>` : ''}
+                  </div>`;
+                }).join('')}
+              </div>
+              <div class="chart-axis">
+                ${labels.map(l => `<div class="lbl">${l}</div>`).join('')}
+              </div>
+              <div class="chart-legend">
+                <span><span class="sw" style="background:var(--success)"></span>Auto-routed</span>
+                <span><span class="sw" style="background:var(--warning)"></span>Held for review</span>
+                <span><span class="sw" style="background:var(--danger)"></span>SAP failed</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-h"><h2>Recent activity</h2><div class="meta">Live feed</div></div>
+            <div class="section-body">
+              <div class="feed-item ok"><div class="feed-ic"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div class="feed-body"><span class="who">OrbitFlow AI</span> <span class="what">posted <strong>ZPO-001394</strong> to SAP S/4 PRD · ThreadHaven 1208545</span><div class="when">2 min ago</div></div></div>
+              <div class="feed-item warn"><div class="feed-ic"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg></div>
+                <div class="feed-body"><span class="who">OrbitFlow AI</span> <span class="what">held PO <strong>461-38901</strong> — division ambiguous (62%)</span><div class="when">8 min ago</div></div></div>
+              <div class="feed-item fail"><div class="feed-ic"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+                <div class="feed-body"><span class="who">SAP S/4 PRD</span> <span class="what">rejected ZPO posting for <strong>MC-50271</strong> — tax classification missing</span><div class="when">14 min ago</div></div></div>
+              <div class="feed-item ok"><div class="feed-ic"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div class="feed-body"><span class="who">M. Wong</span> <span class="what">resolved exception on <strong>461-38931</strong> · routed to PLT-BD-CTG-220</span><div class="when">21 min ago</div></div></div>
+              <div class="feed-item ok"><div class="feed-ic"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div class="feed-body"><span class="who">OrbitFlow AI</span> <span class="what">learned new vendor alias “Adib Apparel Ltd” → BPV-019930</span><div class="when">38 min ago</div></div></div>
+              <div class="feed-item ok"><div class="feed-ic"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div class="feed-body"><span class="who">OrbitFlow AI</span> <span class="what">posted <strong>ZPO-001393</strong> · Verre Atelier 770204</span><div class="when">52 min ago</div></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="section">
+            <div class="section-h"><h2>Inflow by channel</h2><div class="meta">Last 7 days</div></div>
+            <div class="section-body">
+              <div class="hbar-row"><div class="name">Email inbox</div>
+                <div class="hbar-track"><div class="seg routed" style="width:78%"></div><div class="seg held" style="width:18%"></div><div class="seg failed" style="width:4%"></div></div>
+                <div class="num">142</div></div>
+              <div class="hbar-row"><div class="name">Folder watcher</div>
+                <div class="hbar-track"><div class="seg routed" style="width:91%"></div><div class="seg held" style="width:9%"></div></div>
+                <div class="num">68</div></div>
+              <div class="hbar-row"><div class="name">Manual upload</div>
+                <div class="hbar-track"><div class="seg routed" style="width:67%"></div><div class="seg held" style="width:33%"></div></div>
+                <div class="num">21</div></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-h"><h2>Top vendors by exception rate</h2><div class="meta">Last 30 days</div></div>
+            <div class="section-body">
+              <div class="hbar-row"><div class="name">Raj International</div>
+                <div class="hbar-track"><div class="seg routed" style="width:42%"></div><div class="seg held" style="width:58%"></div></div>
+                <div class="num">58%</div></div>
+              <div class="hbar-row"><div class="name">Maison Calder</div>
+                <div class="hbar-track"><div class="seg routed" style="width:70%"></div><div class="seg held" style="width:25%"></div><div class="seg failed" style="width:5%"></div></div>
+                <div class="num">30%</div></div>
+              <div class="hbar-row"><div class="name">BrightKids Buying</div>
+                <div class="hbar-track"><div class="seg routed" style="width:88%"></div><div class="seg held" style="width:12%"></div></div>
+                <div class="num">12%</div></div>
+              <div class="hbar-row"><div class="name">Verre Atelier</div>
+                <div class="hbar-track"><div class="seg routed" style="width:94%"></div><div class="seg held" style="width:6%"></div></div>
+                <div class="num">6%</div></div>
+              <div class="hbar-row"><div class="name">ThreadHaven Retail</div>
+                <div class="hbar-track"><div class="seg routed" style="width:97%"></div><div class="seg held" style="width:3%"></div></div>
+                <div class="num">3%</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  `;
+}
+
+function renderVendorsView() {
+  const c = $('#view-vendors');
+  if (!c) return;
+  const vendors = [
+    { name: 'BrightKids Buying Co.', bpv: 'BPV-018224', aliases: 4, plant: 'PLT-BD-CTG-220', pos30: 23, exc: 0.12, conf: 0.97 },
+    { name: 'ThreadHaven Retail (UK)', bpv: 'BPV-024100', aliases: 2, plant: 'PLT-CN-QDG-104', pos30: 41, exc: 0.03, conf: 0.99 },
+    { name: 'Raj International Sourcing Ltd', bpv: 'BPV-019930', aliases: 6, plant: 'PLT-BD-CTG-220', pos30: 17, exc: 0.58, conf: 0.78, expand: true },
+    { name: 'Maison Calder', bpv: 'BPV-031702', aliases: 3, plant: 'PLT-CN-QDG-104', pos30: 9,  exc: 0.30, conf: 0.92 },
+    { name: 'Verre Atelier', bpv: 'BPV-022087', aliases: 2, plant: 'PLT-PT-OPO-118', pos30: 14, exc: 0.06, conf: 0.98 },
+    { name: 'Northstar Outfitters', bpv: 'BPV-029314', aliases: 5, plant: 'PLT-VN-SGN-310', pos30: 31, exc: 0.18, conf: 0.94 },
+    { name: 'Linden & Co.', bpv: 'BPV-026651', aliases: 3, plant: 'PLT-IN-TIR-401', pos30: 12, exc: 0.10, conf: 0.96 },
+    { name: 'Hartwell Retail Group', bpv: 'BPV-027811', aliases: 4, plant: 'PLT-BD-DAC-225', pos30: 19, exc: 0.21, conf: 0.93 },
+  ];
+
+  const rajDetail = `
+    <tr class="vendor-detail-row"><td class="vendor-detail" colspan="7">
+      <div class="vendor-detail-inner">
+        <div class="vendor-detail-grid">
+          <div>
+            <h4>Aliases learned by AI</h4>
+            <span class="alias-chip primary">Raj International Sourcing Ltd</span>
+            <span class="alias-chip">Raj Intl Sourcing</span>
+            <span class="alias-chip">Raj International</span>
+            <span class="alias-chip">Raj Limited</span>
+            <span class="alias-chip">RAJ INTL SRCG LTD</span>
+            <span class="alias-chip">Raj Intl. Srcg.</span>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">First seen 14 Mar 2024 · last alias added 3 days ago</div>
+          </div>
+          <div>
+            <h4>Format quirks</h4>
+            <div class="quirk">Uses ratio-pack tables (size breakdown by % of total qty)</div>
+            <div class="quirk">PDF template recognised: <span style="font-family:monospace;font-size:11px;">RajPO_v3</span></div>
+            <div class="quirk">Style number always 8 chars, prefix “JL”</div>
+            <div class="quirk">Inco terms: usually FOB Chittagong (95% of POs)</div>
+            <div class="quirk">Often omits factory — historical default: PLT-BD-CTG-220</div>
+          </div>
+          <div>
+            <h4>Recent POs</h4>
+            <div class="feed-item ok" style="padding:6px 0;"><div class="feed-ic" style="width:18px;height:18px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="feed-body"><div>461-38931 — routed to ZPO-001391</div><div class="when">2 days ago</div></div></div>
+            <div class="feed-item warn" style="padding:6px 0;"><div class="feed-ic" style="width:18px;height:18px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+              <div class="feed-body"><div>461-38901 — held: division ambiguous</div><div class="when">8 min ago</div></div></div>
+            <div class="feed-item ok" style="padding:6px 0;"><div class="feed-ic" style="width:18px;height:18px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="feed-body"><div>461-38872 — routed to ZPO-001388</div><div class="when">5 days ago</div></div></div>
+            <div style="margin-top:8px;"><a href="#" style="font-size:11.5px;color:var(--accent);">View all 17 POs ›</a></div>
+          </div>
+        </div>
+      </div>
+    </td></tr>
+  `;
+
+  c.innerHTML = `
+    <div class="page">
+      <div class="page-inner">
+        <div class="page-header">
+          <div class="crumb">Vendor intelligence</div>
+          <h1>Vendors</h1>
+          <div class="sub">OrbitFlow has learned <strong>${vendors.length}</strong> vendors from your inbound traffic. 3 are awaiting confirmation.</div>
+        </div>
+
+        <div class="section" style="border-color:var(--warning-bd);">
+          <div class="section-h" style="background:var(--warning-bg);">
+            <h2 style="color:var(--warning);">3 unmatched vendors awaiting confirmation</h2>
+            <div class="meta">AI has seen these names but can't confidently match them to your master</div>
+          </div>
+          <div class="section-body">
+            <div class="pending-stack">
+              <div class="pending-vendor-card">
+                <div style="flex:1;">
+                  <div class="pv-name">“Adib Apparel Ltd”</div>
+                  <div class="pv-meta">Seen 3 times · first 2 days ago · last 8 min ago</div>
+                  <div class="pv-suggest">Suggested match: <strong>BPV-019930 (Raj Limited)</strong> — 78% similarity</div>
+                </div>
+                <button class="btn ghost">Reject</button>
+                <button class="btn">Confirm match</button>
+                <button class="btn ghost">Create new</button>
+              </div>
+              <div class="pending-vendor-card">
+                <div style="flex:1;">
+                  <div class="pv-name">“Verre Studio (Porto)”</div>
+                  <div class="pv-meta">Seen 2 times · first 5 days ago</div>
+                  <div class="pv-suggest">Suggested match: <strong>BPV-022087 (Verre Atelier)</strong> — 84% similarity</div>
+                </div>
+                <button class="btn ghost">Reject</button>
+                <button class="btn">Confirm match</button>
+                <button class="btn ghost">Create new</button>
+              </div>
+              <div class="pending-vendor-card">
+                <div style="flex:1;">
+                  <div class="pv-name">“Knitcraft Tirupur Pvt”</div>
+                  <div class="pv-meta">Seen 1 time · yesterday</div>
+                  <div class="pv-suggest">No suggested match — this looks like a new vendor</div>
+                </div>
+                <button class="btn ghost">Reject</button>
+                <button class="btn">Create new vendor</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-h">
+            <h2>All vendors</h2>
+            <div class="meta">Click a row to expand AI-learned details</div>
+          </div>
+          <table class="vendors-table">
+            <thead><tr>
+              <th>Vendor</th>
+              <th>BPV code</th>
+              <th>Aliases</th>
+              <th>Default plant</th>
+              <th class="num">POs (30d)</th>
+              <th class="num">Exc. rate</th>
+              <th>Mapping confidence</th>
+            </tr></thead>
+            <tbody>
+              ${vendors.map(v => `
+                <tr class="${v.expand ? 'expanded' : ''}">
+                  <td><strong>${escapeHtml(v.name)}</strong></td>
+                  <td style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-muted);">${v.bpv}</td>
+                  <td>${v.aliases} learned</td>
+                  <td style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-muted);">${v.plant}</td>
+                  <td class="num">${v.pos30}</td>
+                  <td class="num" style="color:${v.exc > 0.3 ? 'var(--danger)' : v.exc > 0.15 ? 'var(--warning)' : 'var(--success)'};">${(v.exc*100).toFixed(0)}%</td>
+                  <td><div class="vendor-confbar"><div class="bar"><span class="${v.conf < 0.85 ? 'warn' : ''}" style="width:${(v.conf*100).toFixed(0)}%"></span></div><div class="pct">${(v.conf*100).toFixed(0)}%</div></div></td>
+                </tr>
+                ${v.expand ? rajDetail : ''}
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderRoutingView() {
+  const c = $('#view-routing');
+  if (!c) return;
+  const rules = [
+    { on: true,  cond: [['Customer','=','BrightKids Buying Co.']], then: [['plant','PLT-BD-CTG-220'],['buyerGroup','KIDS-WW']], trig: 142, ovr: 3 },
+    { on: true,  cond: [['Customer','=','ThreadHaven Retail (UK)'],['Division','=','06']], then: [['plant','PLT-CN-QDG-104'],['buyerGroup','WW-KW']], trig: 89, ovr: 0 },
+    { on: true,  cond: [['Country','=','Bangladesh'],['Inco terms','starts','FOB']], then: [['port_of_exit','Chittagong'],['ship_mode','Ocean']], trig: 217, ovr: 8 },
+    { on: true,  cond: [['Vendor alias','contains','Raj']], then: [['supplier','BPV-019930']], trig: 17, ovr: 1 },
+    { on: false, cond: [['Total Value','>','USD 50,000']], then: [['flag','high-value-review']], trig: 4, ovr: 0 },
+    { on: true,  cond: [['Style No','starts','JL'],['Customer','=','Raj International Sourcing Ltd']], then: [['division','06 — Womens Casual']], trig: 11, ovr: 2 },
+  ];
+  const condHtml = (cs) => cs.map(([k,op,v]) =>
+    `<span class="k">${escapeHtml(k)}</span><span class="op">${escapeHtml(op)}</span><span>“${escapeHtml(v)}”</span>`).join('<span class="op">AND</span>');
+  const thenHtml = (ts) => ts.map(([k,v]) =>
+    `<span class="k">${escapeHtml(k)}</span><span class="op">=</span><span>“${escapeHtml(v)}”</span>`).join('<span class="op">,</span>');
+
+  c.innerHTML = `
+    <div class="page">
+      <div class="page-inner">
+        <div class="page-header">
+          <div class="crumb">Control plane</div>
+          <h1>Routing rules</h1>
+          <div class="sub">OrbitFlow learns most routing decisions automatically. Use this page to set the guardrails: confidence thresholds, validators, and explicit overrides.</div>
+        </div>
+
+        <div class="section">
+          <div class="section-h">
+            <h2>Confidence thresholds</h2>
+            <div class="meta">Below these values, the AI hands off to a human</div>
+          </div>
+          <div class="section-body">
+            <div class="threshold-card">
+              <div class="tc-name">Auto-route to ERP<div class="sub">Above this, OrbitFlow posts directly without review</div></div>
+              <input type="range" min="70" max="100" value="95" />
+              <div class="tc-val">95%</div>
+            </div>
+            <div class="threshold-card">
+              <div class="tc-name">Field-level lock<div class="sub">Fields above this confidence are visually “locked” in review UI</div></div>
+              <input type="range" min="70" max="100" value="95" />
+              <div class="tc-val">95%</div>
+            </div>
+            <div class="threshold-card">
+              <div class="tc-name">Hold for review<div class="sub">Below this, item is routed to Exception queue</div></div>
+              <input type="range" min="50" max="95" value="85" />
+              <div class="tc-val">85%</div>
+            </div>
+            <div class="threshold-card">
+              <div class="tc-name">Reject outright<div class="sub">Below this, item is rejected and sender is notified</div></div>
+              <input type="range" min="20" max="70" value="45" />
+              <div class="tc-val">45%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-h">
+            <h2>Routing rules <span class="badge muted" style="margin-left:6px;">${rules.length}</span></h2>
+            <div class="meta">Drag to reorder · first matching rule wins</div>
+          </div>
+          <div>
+            ${rules.map((r, i) => `
+              <div class="rule-row">
+                <div class="drag">⋮⋮</div>
+                <div class="num-badge">${i+1}</div>
+                <div class="rule-cond"><strong style="color:var(--text-muted);font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:3px;">When</strong>${condHtml(r.cond)}</div>
+                <div class="rule-then"><strong style="color:var(--text-muted);font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:3px;">Then set</strong>${thenHtml(r.then)}</div>
+                <div class="rule-stats">
+                  <span class="triggered">${r.trig} triggered</span>
+                  ${r.ovr > 0 ? `<span class="overridden">${r.ovr} overridden</span>` : '<span>0 overridden</span>'}
+                </div>
+                <div><div class="toggle ${r.on ? 'on' : ''}"></div></div>
+                <div style="text-align:right;"><a href="#" style="font-size:11.5px;color:var(--accent);">Edit</a></div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-h">
+            <h2>Field validators by channel</h2>
+            <div class="meta">Required fields per inbound source</div>
+          </div>
+          <div class="section-body">
+            <div class="validator-row"><div class="ch">Email inbox</div>
+              <div class="req">
+                <span class="req-chip">External PO #</span><span class="req-chip">Customer</span><span class="req-chip">Total Qty</span><span class="req-chip">Total Value</span><span class="req-chip">Currency</span>
+                <span class="req-chip optional">Factory</span><span class="req-chip optional">Inco terms</span>
+              </div></div>
+            <div class="validator-row"><div class="ch">Folder watcher</div>
+              <div class="req">
+                <span class="req-chip">External PO #</span><span class="req-chip">Customer</span><span class="req-chip">Total Qty</span><span class="req-chip">Ship date</span><span class="req-chip">Port of exit</span><span class="req-chip">Inco terms</span>
+              </div></div>
+            <div class="validator-row"><div class="ch">Manual upload</div>
+              <div class="req">
+                <span class="req-chip">External PO #</span><span class="req-chip">Customer</span>
+                <span class="req-chip optional">Total Qty</span><span class="req-chip optional">Ship date</span>
+              </div></div>
+            <div class="validator-row"><div class="ch">EDI 850</div>
+              <div class="req">
+                <span class="req-chip">PO #</span><span class="req-chip">Vendor DUNS</span><span class="req-chip">Ship-to</span><span class="req-chip">Line items</span><span class="req-chip">Total Value</span>
+              </div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  `;
+}
+
+// --------- View switching ---------
+function switchView(viewKey) {
+  $$('.view').forEach(v => v.classList.remove('active'));
+  const target = document.getElementById('view-' + viewKey);
+  if (target) target.classList.add('active');
+  $$('.topbar-nav a').forEach(a => a.classList.remove('active'));
+  const link = document.querySelector(`.topbar-nav a[data-view="${viewKey}"]`);
+  if (link) link.classList.add('active');
+  if (viewKey === 'dashboard') renderDashboardView();
+  if (viewKey === 'vendors')   renderVendorsView();
+  if (viewKey === 'routing')   renderRoutingView();
+}
+$$('.topbar-nav a[data-view]').forEach(a => {
+  a.addEventListener('click', (e) => { e.preventDefault(); switchView(a.dataset.view); });
+});
+
+function init() {
+  // pre-select first incoming item
+  const firstIncoming = itemsBy('incoming')[0];
+  if (firstIncoming) state.selectedId = firstIncoming.id;
+  renderCounts();
+  renderList();
+  renderWorkspace();
+}
+init();
+
+</script>
+</body>
+</html>
