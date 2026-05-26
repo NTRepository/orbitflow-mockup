@@ -1339,7 +1339,7 @@ function makeDummyDone(rows) {
             : r.ch === 'folder' ? 'fileshare://fs01/orbitflow/drop'
             :                     'm.wong@neotangent.com (manual upload)',
       receivedAt: mins(r.ago),
-      files: [{ name: `${r.brand} PO ${r.po}.pdf`, src: 'mock_orders/brightkids_2450187.pdf' }],
+      files: [{ name: `${r.brand} PO ${r.po}.pdf`, src: ['mock_orders/brightkids_2450187.pdf','mock_orders/george_1208545.pdf','mock_orders/george_1208546.pdf','mock_orders/raj_461-38901.pdf','mock_orders/raj_461-38931.pdf'][idx % 5] }],
       state: 'done',
       hidden: false,
       extracted: {
